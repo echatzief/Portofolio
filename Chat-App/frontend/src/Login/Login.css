@@ -1,0 +1,28 @@
+/* Set the general background */
+html,body{
+    background:#E5E5E5;
+}
+
+/* Change placeholder at center */
+::-webkit-input-placeholder {
+    text-align: center;
+ }
+ 
+ :-moz-placeholder { /* Firefox 18- */
+    text-align: center;  
+ }
+ 
+ ::-moz-placeholder {  /* Firefox 19+ */
+    text-align: center;  
+ }
+ 
+ :-ms-input-placeholder {  
+    text-align: center; 
+ }
+
+ /*Sign up href */
+.hrefStyle:hover {
+    border-bottom: 1px solid #333333;
+    color: #333333;
+    text-decoration: none;
+}
