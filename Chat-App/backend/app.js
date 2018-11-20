@@ -72,6 +72,14 @@ app.post('/tryToSignUp',(req,res)=>{
     
     console.log("Sign Up: ");
     console.log("Email: "+email+" Username: "+username+" Password: "+password+" Member Password: "+memberPassword);
+
+    /* Connect to the database and search for user if exists */
+    client.connect();
+
+    /* Do stuff */
+
+    /* Close the connection */
+    client.end();
 })
 
 
