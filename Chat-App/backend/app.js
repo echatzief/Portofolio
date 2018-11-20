@@ -13,7 +13,7 @@ const { Pool, Client } = require('pg');
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
-    database: 'eidiko_thema',
+    database: 'WebChat',
     password: 'postgres',
     port: 5432,
 })
