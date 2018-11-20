@@ -55,14 +55,7 @@ app.post('/tryToLogin',(req,res)=>{
     /* Connect to the database and search for user if exists */
     client.connect();
 
-    client.query('SELECT * FROM USERS', (err, res) => {
-        if (err) {
-            console.log(err);
-        } 
-        else {
-            console.log(res.rows);
-        }
-    });
+    /* Do stuff */
 
     /* Close the connection */
     client.end();
