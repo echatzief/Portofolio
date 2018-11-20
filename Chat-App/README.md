@@ -31,6 +31,7 @@ changeField ==> changes the state we want based on the type
 **  For the database we use postgresql in order to create the schema that supports the site
 **  We have 4 Tables : Users,Friends,Friend_Requests,Messages
 **  We use the Database_Create_Script.sql to create the database schema
+**  At every post request to try login or signup we connect to the database and we do what its need
 
 ##To Do :
 **  Exw ftiaksei to database schema na to sundesw me thn express 

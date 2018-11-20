@@ -6,7 +6,17 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var PORT = process.env.PORT || 8000;
 
+/* Postgresql Module */
+const { Pool, Client } = require('pg');
 
+/* Client configuration in order to handle requests */
+const client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'eidiko_thema',
+    password: 'postgres',
+    port: 5432,
+})
 var app = express();
 
 // view engine setup
@@ -41,7 +51,23 @@ app.post('/tryToLogin',(req,res)=>{
 
     console.log("Login: ");
     console.log("Email: "+req.body.loginUserInterface.email+" Password: "+req.body.loginUserInterface.password);
-})
+
+    /* Connect to the database and search for user if exists */
+    client.connect();
+
+    client.query('SELECT * FROM USERS', (err, res) => {
+        if (err) {
+            console.log(err);
+        } 
+        else {
+            console.log(res.rows);
+        }
+    });
+
+    /* Close the connection */
+    client.end();
+
+});
 
 app.post('/tryToSignUp',(req,res)=>{
 
