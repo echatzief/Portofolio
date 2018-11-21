@@ -73,14 +73,8 @@ class SignUpTemplate extends Component{
     }
 
     //Show or hide the box
-    manageTheBox = (warningMess)=>{
-
-        if(store.getState().warningBoxVisible == 'none'){
-            store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',warningMess));
-        }
-        else{
-            store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'none',''));
-        }
+    closeTheBox = ()=>{
+        store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'none',''));
     }
 
     signUpNow = ()=>{
@@ -117,7 +111,7 @@ class SignUpTemplate extends Component{
                 <span style={span}>Sign Up Now</span>
                 
                 <div className="container text-center alert alert-info alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
-                    <a href="#" className="close" onClick={this.manageTheBox} data-dismiss="alert" aria-label="close">&times;</a>
+                    <a href="#" className="close" onClick={this.closeTheBox}>&times;</a>
                     <strong>{store.getState().warningBox}</strong>
                 </div>
                 {/* Email input*/}

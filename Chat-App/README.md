@@ -54,3 +54,6 @@ changeField ==> changes the state we want based on the type
 --  Otan patas na stelnei mnm
 --  Na valw emoji
 --  Na anevazei eikones
+
+#Done
+--  Sign Up Form (backend and frontend)

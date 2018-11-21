@@ -85,6 +85,8 @@ export default(state,action)=>{
                 signUpFormPassword:'',          
                 signUpFormUsername:'',          
                 signUpFormMemberPassword:'',    
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         default:
             return state;
