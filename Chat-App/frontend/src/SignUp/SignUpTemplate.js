@@ -78,9 +78,6 @@ class SignUpTemplate extends Component{
     }
 
     signUpNow = ()=>{
-        console.log("USERNAME: "+store.getState().signUpFormUsername+" PASSWORD: "+store.getState().signUpFormPassword+" EMAIL: "
-        +store.getState().signUpFormEmail+" MEMBER PASSWORD: "+store.getState().signUpFormMemberPassword);
-
         var signUpInterface={
             email:store.getState().signUpFormEmail,
             username:store.getState().signUpFormUsername,
