@@ -17,6 +17,11 @@ const client = new Client({
     password: 'postgres',
     port: 5432,
 })
+
+/* Connect to the database */
+client.connect();
+
+
 var app = express();
 
 // view engine setup
@@ -65,21 +70,71 @@ app.post('/tryToLogin',(req,res)=>{
 app.post('/tryToSignUp',(req,res)=>{
 
     /* Get the Sign Up Credentials */
-    var email=req.body.signUpInterface.email;
-    var username=req.body.signUpInterface.username;
-    var password=req.body.signUpInterface.password;
-    var memberPassword=req.body.signUpInterface.memberPassword;
+    var email=req.body.signUpInterface.email.trim();
+    var username=req.body.signUpInterface.username.trim();
+    var password=req.body.signUpInterface.password.trim();
+    var memberPassword=req.body.signUpInterface.memberPassword.trim();
+    var response=res;
     
     console.log("Sign Up: ");
     console.log("Email: "+email+" Username: "+username+" Password: "+password+" Member Password: "+memberPassword);
 
-    /* Connect to the database and search for user if exists */
-    client.connect();
+    /* If the member password is correct */
+    if(memberPassword ==="webchat"){
 
-    /* Do stuff */
+        /* The parameters for the query */
+        const text = 'SELECT * FROM USERS WHERE username=$1 and password=$2 and email=$3';
+        const values = [username, password,email];
 
-    /* Close the connection */
-    client.end();
+        /* Check if the user exists */
+        client.query(text, values, (err, res) => {
+            if (err) {
+              console.log(err.stack)
+            } else {
+              
+                /* If the user dont exist we create them else we return error */
+                if(res.rows.length == 0){
+                    
+                    /* Count all the users */
+                    const q = 'SELECT * FROM USERS';
+                    client.query(q,(err,res)=>{
+                        if(err){
+                            console.log(err.stack)
+                        }
+                        else{
+
+                            /* Insert a new user */
+                            const user_ID=res.rows.length + 1 ;
+                            const textQuery = 'INSERT INTO USERS(username,password,user_id,email,status) '+
+                            'VALUES($1,$2,$4,$3,$5)';
+                            const valuesQuery = [username, password,email,user_ID,'NO ACTIVE'];
+                            
+                            client.query(textQuery,valuesQuery,(err,res)=>{
+                                if(err){
+                                    console.log(err.stack)
+                                }
+                                else{
+                                    console.log(username+" added to USERS.");  
+                                }
+                            })
+
+                            /* Everything ok */
+                            response.sendStatus(200);
+                        }
+                    })
+                }
+                else{
+                    /* User already exists */
+                    response.sendStatus(204);
+                }
+            }
+        })
+    }
+    else{
+        /* Wrong member password */
+        response.sendStatus(205);
+    }
+   
 })
 
 

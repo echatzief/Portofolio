@@ -33,27 +33,13 @@ CREATE TABLE Users (
 
 -- foreign keys
 -- Reference: Friends_Users (table: Friends)
-ALTER TABLE Friends ADD CONSTRAINT Friends_Users
-    FOREIGN KEY (User_ID)
-    REFERENCES Users (User_ID)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+ALTER TABLE Friends ADD FOREIGN KEY (User_ID) REFERENCES Users (User_ID)  ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 -- Reference: Messages_Users (table: Messages)
-ALTER TABLE Messages ADD CONSTRAINT Messages_Users
-    FOREIGN KEY (User_ID)
-    REFERENCES Users (User_ID)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+ALTER TABLE Messages ADD FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Reference: Users_Friend_Requests (table: Users)
-ALTER TABLE Users ADD CONSTRAINT Users_Friend_Requests
-    FOREIGN KEY (User_ID)
-    REFERENCES Friend_Requests (User_ID)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+ALTER TABLE Friend_Requests ADD FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- End of file.

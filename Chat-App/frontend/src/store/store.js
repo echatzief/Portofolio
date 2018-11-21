@@ -8,6 +8,8 @@ const initialState={
     signUpFormPassword:'',          /* Password Field at SignUp Form*/
     signUpFormUsername:'',          /* Username Field at SignUp Form*/
     signUpFormMemberPassword:'',    /* Member Password Field at SignUp Form*/ 
+    warningBoxVisible:'none',       /* Warning Box Visibility */
+    warningBox:'',                  /* Warning Box */
 }
 
 export const store=createStore(reducer,initialState);

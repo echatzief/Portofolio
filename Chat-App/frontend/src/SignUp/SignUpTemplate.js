@@ -1,6 +1,6 @@
 import React,{Component} from 'react';
 import { store } from '../store/store';
-import {changeField} from '../actions/act';
+import {changeField,changeWarningBox} from '../actions/act';
 import axios from 'axios';
 /* The signUp style */
 const signUpContainer={
@@ -46,8 +46,12 @@ const hrefStyle={
     color:'#333333',
     lineHeight:'1.2',
 }
+const warning={
+    display:store.getState().warningBoxVisible
+}
 
 class SignUpTemplate extends Component{
+
     changeEmail = (e)=>{
         store.dispatch(changeField("CHANGE_SIGN_UP_EMAIL",e.target.value));
     }
@@ -68,6 +72,17 @@ class SignUpTemplate extends Component{
         }
     }
 
+    //Show or hide the box
+    manageTheBox = (warningMess)=>{
+
+        if(store.getState().warningBoxVisible == 'none'){
+            store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',warningMess));
+        }
+        else{
+            store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'none',''));
+        }
+    }
+
     signUpNow = ()=>{
         console.log("USERNAME: "+store.getState().signUpFormUsername+" PASSWORD: "+store.getState().signUpFormPassword+" EMAIL: "
         +store.getState().signUpFormEmail+" MEMBER PASSWORD: "+store.getState().signUpFormMemberPassword);
@@ -82,7 +97,15 @@ class SignUpTemplate extends Component{
         /* Try to sign Up */
         axios.post('/tryToSignUp',{signUpInterface})
         .then(res=>{
-            console.log(res);
+            if(res.status == 204){
+                store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"User already exists."));
+            }
+            else if(res.status == 205){
+                store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong member password."));
+            }
+            else{
+                store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Successfully Added."));
+            }
         })
 
         /* Clear the fields*/
@@ -92,7 +115,11 @@ class SignUpTemplate extends Component{
         return(
             <div className="container text-center" style={signUpContainer}>
                 <span style={span}>Sign Up Now</span>
-
+                
+                <div className="container text-center alert alert-info alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
+                    <a href="#" className="close" onClick={this.manageTheBox} data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>{store.getState().warningBox}</strong>
+                </div>
                 {/* Email input*/}
                 <div style={dataInput} className="container text-center">
                     <input type="email" style={changeInput} className="form-control" id="emailData" onChange={this.changeEmail} value={store.getState().signUpFormEmail} placeholder="Email"></input>

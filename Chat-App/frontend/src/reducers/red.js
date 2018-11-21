@@ -8,6 +8,8 @@ export default(state,action)=>{
                 signUpFormPassword:state.signUpFormPassword,          
                 signUpFormUsername:state.signUpFormUsername,          
                 signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         case "CHANGE_LOGIN_PASSWORD":
             return{
@@ -17,6 +19,8 @@ export default(state,action)=>{
                 signUpFormPassword:state.signUpFormPassword,          
                 signUpFormUsername:state.signUpFormUsername,          
                 signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         case "CHANGE_SIGN_UP_EMAIL":
             return{
@@ -26,6 +30,8 @@ export default(state,action)=>{
                 signUpFormPassword:state.signUpFormPassword,          
                 signUpFormUsername:state.signUpFormUsername,          
                 signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         case "CHANGE_SIGN_UP_PASSWORD":
             return{
@@ -35,6 +41,8 @@ export default(state,action)=>{
                 signUpFormPassword:action.data,          
                 signUpFormUsername:state.signUpFormUsername,          
                 signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         case "CHANGE_SIGN_UP_USERNAME":
             return{
@@ -44,6 +52,8 @@ export default(state,action)=>{
                 signUpFormPassword:state.signUpFormPassword,          
                 signUpFormUsername:action.data,          
                 signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
             };
         case "CHANGE_SIGN_UP_MEMBER_PASSWORD":
             return{
@@ -53,6 +63,19 @@ export default(state,action)=>{
                 signUpFormPassword:state.signUpFormPassword,          
                 signUpFormUsername:state.signUpFormUsername,          
                 signUpFormMemberPassword:action.data, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
+            };
+        case "CHANGE_WARNING_BOX":
+            return{
+                loginFormEmail:state.loginFormEmail,              
+                loginFormPassword:state.loginFormPassword,           
+                signUpFormEmail:state.signUpFormEmail,             
+                signUpFormPassword:state.signUpFormPassword,          
+                signUpFormUsername:state.signUpFormUsername,          
+                signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:action.visibility,
+                warningBox:action.data,
             };
         case "CLEAR_FIELDS":
             return{

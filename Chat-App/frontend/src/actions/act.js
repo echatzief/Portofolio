@@ -6,3 +6,12 @@ export function changeField(typ,value){
         data:value,
     }
 }
+
+/* Change the warning box */
+export function changeWarningBox(typ,vis,dat){
+    return{
+        type:typ,
+        visibility:vis,
+        data:dat,
+    }
+}

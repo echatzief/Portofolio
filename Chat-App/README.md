@@ -33,6 +33,16 @@ changeField ==> changes the state we want based on the type
 --  We use the Database_Create_Script.sql to create the database schema
 --  At every post request to try login or signup we connect to the database and we do what its need
 
+##Post Request Status
+--For Login:
+    -- 200 ==> Everything is ok
+    -- 204 ==> Wrong password/username at login
+--For signUp:
+    -- 200 ==> Everything is ok
+    -- 205 ==> Wrong member password
+    -- 204 ==> Already exists at sign up
+
+
 ##To Do :
 --  Exw ftiaksei to database schema na to sundesw me thn express 
     kai na to testarw pws trexei
