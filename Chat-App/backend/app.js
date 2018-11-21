@@ -57,13 +57,11 @@ app.post('/tryToLogin',(req,res)=>{
     console.log("Login: ");
     console.log("Email: "+req.body.loginUserInterface.email+" Password: "+req.body.loginUserInterface.password);
 
-    /* Connect to the database and search for user if exists */
-    client.connect();
 
     /* Do stuff */
+    res.sendStatus(204);
 
-    /* Close the connection */
-    client.end();
+    
 
 });
 

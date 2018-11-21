@@ -72,7 +72,7 @@ class SignUpTemplate extends Component{
         }
     }
 
-    //Show or hide the box
+    //hide the box
     closeTheBox = ()=>{
         store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'none',''));
     }
@@ -107,6 +107,7 @@ class SignUpTemplate extends Component{
             <div className="container text-center" style={signUpContainer}>
                 <span style={span}>Sign Up Now</span>
                 
+                {/* Warning box */}
                 <div className="container text-center alert alert-info alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
                     <a href="#" className="close" onClick={this.closeTheBox}>&times;</a>
                     <strong>{store.getState().warningBox}</strong>

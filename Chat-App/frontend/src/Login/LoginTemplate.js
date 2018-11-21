@@ -1,7 +1,7 @@
 import React,{Component} from 'react';
 import './Login.css';
 import {store} from '../store/store';
-import  {changeField}  from '../actions/act';
+import  {changeField,changeWarningBox}  from '../actions/act';
 import axios from 'axios';
 
 /* The style we use at the login form */
@@ -78,6 +78,11 @@ class LoginTemplate extends Component{
         }
     }
 
+    //hide the box
+    closeTheBox = ()=>{
+        store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'none',''));
+    }
+
     /* Login function to go in to the chat */
     loginNow = (e)=>{
         console.log("EMAIL: "+store.getState().loginFormEmail+" PASSWORD: "+store.getState().loginFormPassword);
@@ -91,7 +96,11 @@ class LoginTemplate extends Component{
         /* Try to login */
         axios.post('/tryToLogin',{loginUserInterface})
         .then((res)=>{
-            console.log(res);
+            
+            /* Wrong password or email or username */
+            if(res.status == 204){
+                store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong combination of credentials."));
+            }
         })
 
         /* Clear the fields*/
@@ -102,6 +111,12 @@ class LoginTemplate extends Component{
             <div className="container text-center" style={LoginContainer}>
                 <span style={span}>Login</span>
                
+                {/* Warning box */}
+                <div className="container text-center alert alert-danger alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
+                    <a href="#" className="close" onClick={this.closeTheBox}>&times;</a>
+                    <strong>{store.getState().warningBox}</strong>
+                </div>
+
                 {/* Email input*/}
                 <div style={dataInput} className="container text-center">
                     <input type="email" style={changeInput} className="form-control" id="emailData" onChange={this.changeEmail} value={store.getState().loginFormEmail} placeholder="Email"></input>
