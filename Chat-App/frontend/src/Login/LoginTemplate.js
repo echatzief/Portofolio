@@ -101,6 +101,9 @@ class LoginTemplate extends Component{
             if(res.status == 204){
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong combination of credentials."));
             }
+            else{
+                console.log("Successfully logged.");
+            }
         })
 
         /* Clear the fields*/

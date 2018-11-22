@@ -53,16 +53,25 @@ app.post('/tryToLogin',(req,res)=>{
     /* Get the login credentials */
     var email=req.body.loginUserInterface.email;
     var password=req.body.loginUserInterface.password;
+    var response=res;
 
     console.log("Login: ");
     console.log("Email: "+req.body.loginUserInterface.email+" Password: "+req.body.loginUserInterface.password);
 
+    /* The parameters for the query */
+    const text = 'SELECT * FROM USERS WHERE email=$1 and password=$2';
+    const values = [email, password];
 
-    /* Do stuff */
-    res.sendStatus(204);
-
+    /* Check if the client exists */
+    client.query(text,values,(err,res)=>{
+        if(res.rows.length  == 0){
+            response.sendStatus(204);
+        }
+        else{
+            response.sendStatus(200);
+        }
+    })
     
-
 });
 
 app.post('/tryToSignUp',(req,res)=>{
