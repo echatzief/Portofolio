@@ -72,7 +72,8 @@ app.post('/tryToLogin',(req,res)=>{
             response.sendStatus(204);
         }
         else{
-            response.sendStatus(200);
+            /* Return the username */
+            response.send(res.rows[0].username.trim());
         }
     })
     

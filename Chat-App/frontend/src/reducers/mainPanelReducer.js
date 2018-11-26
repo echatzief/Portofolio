@@ -4,19 +4,19 @@ export default(state,action)=>{
             return{
                 searchBox:state.searchBox,      
                 searchResults:state.searchResults,
-                currentUserEmail:action.data,
+                currentUser:action.data,
             };
         case "CHANGE_SEARCH_BOX":
             return{
                 searchBox:action.data,      
                 searchResults:state.searchResults,
-                currentUserEmail:state.currentUserEmail,
+                currentUser:state.currentUser,
             };
         case "CHANGE_SEARCH_RESULTS":
             return{
                 searchBox:state.searchBox,      
                 searchResults:action.data,
-                currentUserEmail:state.currentUserEmail,
+                currentUser:state.currentUser,
             };
         default: return state;
     }

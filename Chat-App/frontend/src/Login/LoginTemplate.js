@@ -90,9 +90,9 @@ class LoginTemplate extends Component{
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong combination of credentials."));
             }
             else{
-                /* Pass the email to the next */
-                mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",loginUserInterface.email));
-                this.props.history.push('/frontPanel/'+store.getState().loginFormEmail);
+                /* Pass the username to the next store*/
+                mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",res.data));
+                this.props.history.push('/frontPanel/');
             }
         })
 

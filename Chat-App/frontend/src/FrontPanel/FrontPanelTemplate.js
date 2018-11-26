@@ -29,7 +29,7 @@ const  results = {
 class FrontPanelTemplate extends Component{
 
     componentDidMount(){
-        console.log("Current user email: "+mainPanelStore.getState().currentUserEmail);
+        console.log("Current user email: "+mainPanelStore.getState().currentUser);
         /* Get the friend requests */
         /* Get the active ones */
         /* Get the friends */
@@ -41,38 +41,44 @@ class FrontPanelTemplate extends Component{
         }
     }
 
+    /* Clear the search box */
     clearSearchInput(){
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
     }
+    /* Change the input */
     changeSearchInput=(e)=>{
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",e.target.value));
-        console.log("Search: "+mainPanelStore.getState().searchBox);
     }
 
+    /* Get the search results from the server */
     getSearchResults = ()=>{
         
         /* Get the results from server */
         var username=mainPanelStore.getState().searchBox;
-        console.log("Search: "+username);
-        axios.post('/getResultsByUsername',{username})
-        .then((res)=>{
 
-            if(res.status==204){
-                mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",["No Results"]));
+        /* Search for different user not yourself */
+        if(username!=mainPanelStore.getState().currentUser){
+            console.log("Search: "+username);
+            axios.post('/getResultsByUsername',{username})
+            .then((res)=>{
 
-                //Clear search input
-                mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
-            }
-            else{
-                mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",res.data));
-                
-                //Clear search input
-                mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
-                console.log(res.data);
-            }
-        })
+                if(res.status==204){
+                    mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",["No Results"]));
+
+                    //Clear search input
+                    mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
+                }
+                else{
+                    mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",res.data));
+                    
+                    //Clear search input
+                    mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
+                }
+            })
+        }
     }
-    
+
+    /* Render properly the results we get */
     createSearchResult = (item,i)=>{
         if(item=="No Results"){
             return(
@@ -84,10 +90,21 @@ class FrontPanelTemplate extends Component{
         else{
             return(
                 <div className="container text-center" style={results}>
-                    <h2>{item.username} <button type="button" id={item.username} className="btn btn-success">Add User</button> </h2>
+                    <h2>{item.username} <button type="button" id={item.username} className="btn btn-success" onClick={this.addUserAsFriend}>Add User</button> </h2>
                 </div>
             );
         }
+    }
+
+    /* Add user as a friend */
+    addUserAsFriend = (e)=>{
+
+        /* Get the username of the friend we want to add */
+        var usernameOfFriend = e.target.id;
+        axios.post('/addFriendByUsername',{usernameOfFriend})
+        .then(res=>{
+            console.log(res);
+        })
     }
    
     render(){
@@ -100,7 +117,7 @@ class FrontPanelTemplate extends Component{
                         {/* Button to open */}
                         <div className="card-header text-center" id="header" style={headerStyle}>
                             <h5 className="mb-0">
-                                <button style={headerButtonStyle} className="btn " data-toggle="collapse" data-target="#searchCollapse" aria-expanded="false" aria-controls="searchCollapse">
+                                <button style={headerButtonStyle} onClick={this.clearSearchInput} className="btn " data-toggle="collapse" data-target="#searchCollapse" aria-expanded="false" aria-controls="searchCollapse">
                                     Search
                                 </button>
                             </h5>
