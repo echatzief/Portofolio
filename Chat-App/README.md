@@ -8,18 +8,26 @@
     For the sign up we find first if the user exists and then if the user doesnt exists
     we create one based on the inputs
 --  We have add a listener to submit the form just by pressing 'Enter'
--- The CSS style is included inside the components
+--  The CSS style is included inside the components
+--  For the search at the FrontPanel we send the request and then we save the response to array
+    and then we render the returned array to a div 
+--  We use different store for login-signup and other for the rest of the pages
 
 ** ------------------------------------------ Components------------------------------------------ **
 LoginTemplate.js
 SignUpTemplate.js
+FrontPanel.js
 ** ------------------------------------------ States --------------------------------------------- **
+//Login - SignUp
 loginFormEmail ==> email input at the login form
 loginFormPassword ==> password input at the login form
 signUpFormEmail ==> email input at the sign up form
 signUpFormPassword ==> password input at the sign up form
 signUpFormUsername ==> username input at the sign up form
 signUpFormMemberPassword ==> member password input at the sign up form
+//FrontPanel
+searchBox ==> Search box input
+searchResults ==>Results of the search
 ** ------------------------------------------ Actions -------------------------------------------- **
 changeField ==> changes the state we want based on the type
 
@@ -32,6 +40,7 @@ changeField ==> changes the state we want based on the type
 --  We have 4 Tables : Users,Friends,Friend_Requests,Messages
 --  We use the Database_Create_Script.sql to create the database schema
 --  At every post request to try login or signup we connect to the database and we do what its need
+--  For search we do a query and return the results to the front
 
 ##Post Request Status
 --For Login:
@@ -41,11 +50,11 @@ changeField ==> changes the state we want based on the type
     -- 200 ==> Everything is ok
     -- 205 ==> Wrong member password
     -- 204 ==> Already exists at sign up
+--For user search:
+    -- 204 ==> User doesnt exists
 
 
 ##To Do :
---  Exw ftiaksei to database schema na to sundesw me thn express 
-    kai na to testarw pws trexei
 --  Na ftiaxw to UI gia to main kai ta mhnhmata
 --  Na ftiaxw na mporei na kanei request gia na kanei add filous
 --  Na mporei na aporiptei friend request 

@@ -3,7 +3,7 @@ import './Login.css';
 import {store} from '../store/store';
 import  {changeField,changeWarningBox}  from '../actions/act';
 import axios from 'axios';
-
+import { mainPanelStore } from '../store/mainPanelStore';
 /* The style we use at the login form */
 const LoginContainer={
     marginTop:'10%',
@@ -51,18 +51,6 @@ const hrefStyle={
 
 class LoginTemplate extends Component{
     
-    handleKeyPress(event) {
-        if (event.keyCode === 13) {
-            alert("Enter");
-        }
-    }
-    componentDidMount() {
-        document.addEventListener('root',this.handleKeyPress);
-    }
-    componentWillUnmount() {
-        document.removeEventListener('root', this.handleKeyPress);
-    }
-
     /* Change the input fields*/
     changeEmail = (e)=>{
         store.dispatch(changeField("CHANGE_LOGIN_EMAIL",e.target.value));
@@ -98,11 +86,13 @@ class LoginTemplate extends Component{
         .then((res)=>{
             
             /* Wrong password or email or username */
-            if(res.status == 204){
+            if(res.status === 204){
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong combination of credentials."));
             }
             else{
-                console.log("Successfully logged.");
+                /* Pass the email to the next */
+                mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",loginUserInterface.email));
+                this.props.history.push('/frontPanel/'+store.getState().loginFormEmail);
             }
         })
 
@@ -116,7 +106,7 @@ class LoginTemplate extends Component{
                
                 {/* Warning box */}
                 <div className="container text-center alert alert-danger alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
-                    <a href="#" className="close" onClick={this.closeTheBox}>&times;</a>
+                    <button href="#" className="close" onClick={this.closeTheBox}>&times;</button>
                     <strong>{store.getState().warningBox}</strong>
                 </div>
 

@@ -46,9 +46,6 @@ const hrefStyle={
     color:'#333333',
     lineHeight:'1.2',
 }
-const warning={
-    display:store.getState().warningBoxVisible
-}
 
 class SignUpTemplate extends Component{
 
@@ -88,10 +85,10 @@ class SignUpTemplate extends Component{
         /* Try to sign Up */
         axios.post('/tryToSignUp',{signUpInterface})
         .then(res=>{
-            if(res.status == 204){
+            if(res.status === 204){
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"User already exists."));
             }
-            else if(res.status == 205){
+            else if(res.status === 205){
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong member password."));
             }
             else{
@@ -109,7 +106,7 @@ class SignUpTemplate extends Component{
                 
                 {/* Warning box */}
                 <div className="container text-center alert alert-info alert-dismissible" style={Object.assign({display:store.getState().warningBoxVisible},dataInput)}>
-                    <a href="#" className="close" onClick={this.closeTheBox}>&times;</a>
+                    <button href="#" className="close" onClick={this.closeTheBox}>&times;</button>
                     <strong>{store.getState().warningBox}</strong>
                 </div>
                 {/* Email input*/}

@@ -88,6 +88,17 @@ export default(state,action)=>{
                 warningBoxVisible:state.warningBoxVisible,
                 warningBox:state.warningBox,
             };
+        case "CHANGE_SEARCH_BOX":
+            return{
+                loginFormEmail:state.loginFormEmail,              
+                loginFormPassword:state.loginFormPassword,           
+                signUpFormEmail:state.signUpFormEmail,             
+                signUpFormPassword:state.signUpFormPassword,          
+                signUpFormUsername:state.signUpFormUsername,          
+                signUpFormMemberPassword:state.signUpFormMemberPassword, 
+                warningBoxVisible:state.warningBoxVisible,
+                warningBox:state.warningBox,
+            };
         default:
             return state;
     }

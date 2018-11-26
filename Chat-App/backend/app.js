@@ -44,6 +44,10 @@ app.get('/signUp',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
+app.get('/frontPanel',(req,res)=>{
+    res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
+})
+
 //Under everything
 app.use(express.static(path.join(__dirname, '/../frontend/build')));
 
@@ -143,6 +147,27 @@ app.post('/tryToSignUp',(req,res)=>{
     }
    
 })
+
+app.post('/getResultsByUsername',(req,res)=>{
+    
+    /* Get the username for the query */
+    var username=req.body.username;
+    var response = res;
+    
+    /* The parameters for the query */
+    const text = 'SELECT * FROM USERS WHERE username=$1';
+    const values = [username];
+    
+    client.query(text, values, (err, res) => {
+        if(res.rows.length == 0){
+            response.sendStatus(204);
+        }
+        else{
+            var data=res.rows;
+            response.send(data);
+        }
+    })
+});
 
 
 /* Run the app */
