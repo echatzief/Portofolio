@@ -44,6 +44,7 @@ class FrontPanelTemplate extends Component{
     /* Clear the search box */
     clearSearchInput(){
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
+        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",[]));
     }
     /* Change the input */
     changeSearchInput=(e)=>{
