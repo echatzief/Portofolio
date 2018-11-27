@@ -170,6 +170,42 @@ app.post('/getResultsByUsername',(req,res)=>{
     })
 });
 
+/* Add a Friend */
+app.post('/addFriendByUsername',(req,res)=>{
+
+    
+    var usernameOfFriend = req.body.usernameOfFriend;
+    var myUsername=req.body.myUsername;
+
+    var text='SELECT user_id FROM USERS WHERE username=$1';
+    var values=[usernameOfFriend];
+    /* Get the id of the friend */
+    client.query(text,values,function(err,res){
+        if(err){
+           console.log(err);
+        }
+        var friendID=res.rows[0].user_id;
+        text='SELECT user_id FROM USERS WHERE username=$1';
+        values=[myUsername];
+        /* Get my id */
+        client.query(text,values,(err,res)=>{
+            if(err){
+                console.log(err);
+            }
+            var my_user_id=res.rows[0].user_id;
+
+            /* Send the request */
+            text='SELECT user_id FROM USERS WHERE username=$1';
+            values=[myUsername];
+            client.query(t)
+
+        })
+    })
+
+    
+
+})
+
 
 /* Run the app */
 app.listen(PORT,()=>{

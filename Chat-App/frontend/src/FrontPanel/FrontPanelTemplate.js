@@ -41,6 +41,17 @@ class FrontPanelTemplate extends Component{
         }
     }
 
+    getTheFriendRequests = ()=>{
+
+    }
+    getTheActiveOnes = ()=>{
+
+    }
+
+    getTheFriends = ()=>{
+
+    }
+
     /* Clear the search box */
     clearSearchInput(){
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
@@ -102,7 +113,9 @@ class FrontPanelTemplate extends Component{
 
         /* Get the username of the friend we want to add */
         var usernameOfFriend = e.target.id;
-        axios.post('/addFriendByUsername',{usernameOfFriend})
+        var myUsername=mainPanelStore.getState().currentUser;
+        console.log("Wanna add: "+usernameOfFriend);
+        axios.post('/addFriendByUsername',{usernameOfFriend,myUsername})
         .then(res=>{
             console.log(res);
         })

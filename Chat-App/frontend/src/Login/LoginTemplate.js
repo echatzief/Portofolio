@@ -91,8 +91,7 @@ class LoginTemplate extends Component{
             }
             else{
                 /* Pass the username to the next store*/
-                mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",res.data));
-                this.props.history.push('/frontPanel/');
+                this.props.history.push('/frontPanel/'+res.data);
             }
         })
 
