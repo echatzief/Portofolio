@@ -29,7 +29,18 @@ const  results = {
 class FrontPanelTemplate extends Component{
 
     componentDidMount(){
-        console.log("Current user email: "+mainPanelStore.getState().currentUser);
+
+        /* Get the full URL */
+        var fullURL=window.location.href;
+        
+        /* Get the username  from url*/
+        var fullURLSplit=fullURL.split("/");
+        var uname=fullURLSplit[4].trim();
+
+        /* Set the current user */
+        mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
+        console.log("Uname: "+uname);
+        console.log("Current user: "+mainPanelStore.getState().currentUser);
         /* Get the friend requests */
         /* Get the active ones */
         /* Get the friends */

@@ -44,7 +44,7 @@ app.get('/signUp',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
-app.get('/frontPanel',(req,res)=>{
+app.get('/frontPanel/*',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
@@ -176,6 +176,7 @@ app.post('/addFriendByUsername',(req,res)=>{
     
     var usernameOfFriend = req.body.usernameOfFriend;
     var myUsername=req.body.myUsername;
+    var response =res;
 
     var text='SELECT user_id FROM USERS WHERE username=$1';
     var values=[usernameOfFriend];
@@ -194,10 +195,29 @@ app.post('/addFriendByUsername',(req,res)=>{
             }
             var my_user_id=res.rows[0].user_id;
 
-            /* Send the request */
-            text='SELECT user_id FROM USERS WHERE username=$1';
-            values=[myUsername];
-            client.query(t)
+            /* Check if the request exists */
+            text='SELECT * FROM friend_requests where (user_id = $1 and friend_id=$2) or (user_id = $2 and friend_id=$1)';
+            values=[my_user_id,friendID];
+            client.query(text,values,(err,res)=>{
+                if(err){
+                    console.log(err);
+                }
+                if(res.rows.length==0){
+                    /* Add if the request doesnt exists */
+                    text="INSERT INTO friend_requests(user_id,friend_id,status) VALUES($1,$2,'NOT ACCEPTED')";
+                    values=[my_user_id,friendID];
+                    client.query(text,values,(err,res)=>{
+                        if(err){
+                            console.log(err);
+                        }
+                        console.log("Friend request made.");
+                    })
+                }
+                else{
+                    console.log("Friend request exists");
+                }
+                response.sendStatus(200);
+            });
 
         })
     })
