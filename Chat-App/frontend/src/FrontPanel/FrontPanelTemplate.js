@@ -180,9 +180,7 @@ class FrontPanelTemplate extends Component{
                 <div className="accordion container" id="accordion">
                     
                     <div className="card">
-                    for(var i=0;i<allRequests.length;i++){
-                console.log(allRequests[i]);
-            }                {/* Button to open */}
+                              {/* Button to open */}
                         <div className="card-header text-center" id="header" style={headerStyle}>
                             <h5 className="mb-0">
                                 <button style={headerButtonStyle} className="btn " data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
