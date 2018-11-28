@@ -169,7 +169,6 @@ class FrontPanelTemplate extends Component{
                                 <div>        
                                     {mainPanelStore.getState().searchResults.map(((item,i)=>this.createSearchResult(item,i)))}
                                 </div>
-                                {}
                             </div>
                         </div>
 
@@ -202,7 +201,6 @@ class FrontPanelTemplate extends Component{
                 <div className="accordion container" id="accordionSec">
                     
                     <div className="card">
-                        {/* Button to open */}
                         <div className="card-header text-center" id="headerSec"  style={headerStyle}>
                             <h5 className="mb-0">
                                 <button  style={headerButtonStyle} className="btn" data-toggle="collapse" data-target="#collapsSec" aria-expanded="false" aria-controls="collapsSec">
@@ -225,7 +223,6 @@ class FrontPanelTemplate extends Component{
                     <div style={friendStyle}>
                         <p>Friends</p>
                     </div>
-                    
                 </div>
             </div>
         )
