@@ -3,7 +3,8 @@ import './Login.css';
 import {store} from '../store/store';
 import  {changeField,changeWarningBox}  from '../actions/act';
 import axios from 'axios';
-import { mainPanelStore } from '../store/mainPanelStore';
+
+
 /* The style we use at the login form */
 const LoginContainer={
     marginTop:'10%',
@@ -90,9 +91,8 @@ class LoginTemplate extends Component{
                 store.dispatch(changeWarningBox("CHANGE_WARNING_BOX",'block',"Wrong combination of credentials."));
             }
             else{
-                /* Pass the email to the next */
-                mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",loginUserInterface.email));
-                this.props.history.push('/frontPanel/'+store.getState().loginFormEmail);
+                /* Pass the username to the next store*/
+                this.props.history.push('/frontPanel/'+res.data);
             }
         })
 

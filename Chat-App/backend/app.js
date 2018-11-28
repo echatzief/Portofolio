@@ -44,7 +44,7 @@ app.get('/signUp',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
-app.get('/frontPanel',(req,res)=>{
+app.get('/frontPanel/*',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
@@ -72,7 +72,8 @@ app.post('/tryToLogin',(req,res)=>{
             response.sendStatus(204);
         }
         else{
-            response.sendStatus(200);
+            /* Return the username */
+            response.send(res.rows[0].username.trim());
         }
     })
     
@@ -169,7 +170,138 @@ app.post('/getResultsByUsername',(req,res)=>{
     })
 });
 
+/* Add a Friend */
+app.post('/addFriendByUsername',(req,res)=>{
 
+    
+    var usernameOfFriend = req.body.usernameOfFriend;
+    var myUsername=req.body.myUsername;
+    var response =res;
+
+    var text='SELECT user_id FROM USERS WHERE username=$1';
+    var values=[usernameOfFriend];
+    /* Get the id of the friend */
+    client.query(text,values,function(err,res){
+        if(err){
+           console.log(err);
+        }
+        var friendID=res.rows[0].user_id;
+        text='SELECT user_id FROM USERS WHERE username=$1';
+        values=[myUsername];
+        /* Get my id */
+        client.query(text,values,(err,res)=>{
+            if(err){
+                console.log(err);
+            }
+            var my_user_id=res.rows[0].user_id;
+
+            /* Check if the request exists */
+            text='SELECT * FROM friend_requests where (user_id = $1 and friend_id=$2) or (user_id = $2 and friend_id=$1)';
+            values=[my_user_id,friendID];
+            client.query(text,values,(err,res)=>{
+                if(err){
+                    console.log(err);
+                }
+                if(res.rows.length==0){
+                    /* Add if the request doesnt exists */
+                    text="INSERT INTO friend_requests(user_id,friend_id,status) VALUES($1,$2,'NOT ACCEPTED')";
+                    values=[my_user_id,friendID];
+                    client.query(text,values,(err,res)=>{
+                        if(err){
+                            console.log(err);
+                        }
+                        console.log("Friend request made.");
+                    })
+                }
+                else{
+                    console.log("Friend request exists");
+                }
+                response.sendStatus(200);
+            });
+
+        })
+    })
+})
+
+/* Ask for friend requests */
+app.post('/getFriendRequest',(req,res)=>{
+   
+    var usernameOfMe = req.body.username;
+    var response=res;
+
+    /* Get the request that i did */
+    var text='SELECT username FROM Users U WHERE U.user_id='
+    +'( SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id and U.user_id='
+    +'(SELECT user_id FROM Users U WHERE U.username=$1));';
+    var values=[usernameOfMe];
+    
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        //console.log(res.rows);
+
+        var requestsFromMe = new Array();
+
+        /* Parse the requests i made */
+        for(var i=0;i<res.rows.length;i++){
+            
+            //username: to  from: from 
+            var temp = {
+                username:res.rows[i].username.trim(),
+                from:usernameOfMe,
+            }
+            requestsFromMe.push(temp);
+        }
+        text='SELECT username FROM Users U WHERE U.user_id='
+        +'( SELECT F.user_id FROM friend_requests F, users U WHERE F.user_id='
+        +'U.user_id and F.friend_id=(SELECT user_id FROM Users U WHERE U.username=$1));';
+        values=[usernameOfMe];
+        
+        client.query(text,values,(err,res)=>{
+            if(err){
+                console.log(err);
+            }
+           // console.log(requestsFromMe);
+           //console.log(res.rows);
+
+            var requestsToMe = new Array();
+
+            /* Parse the requests i made */
+            for(var i=0;i<res.rows.length;i++){
+                
+                //username: to  from: from 
+                var temp = {
+                    username:usernameOfMe,
+                    from:res.rows[i].username.trim(),
+                }
+                requestsToMe.push(temp);
+            }
+
+            for(var i=0;i<requestsToMe.length;i++){
+                console.log("To: Me From: "+requestsToMe[i].from);
+            }
+
+            for(var i=0;i<requestsFromMe.length;i++){
+                console.log("To: "+requestsFromMe[i].username+" From: Me");
+            }
+            
+            /*Add all request to one table */
+            var allRequests = new Array();
+
+            for(var i=0;i<requestsToMe.length;i++){
+                allRequests.push(requestsToMe[i]);
+            }
+
+            for(var i=0;i<requestsFromMe.length;i++){
+                allRequests.push(requestsFromMe[i]);
+            }
+
+            /* Send the array with the requests */
+            response.send(allRequests);
+        })
+    })
+})
 /* Run the app */
 app.listen(PORT,()=>{
     console.log("App is running at port: "+PORT);

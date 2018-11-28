@@ -41,7 +41,7 @@ changeField ==> changes the state we want based on the type
 --  We use the Database_Create_Script.sql to create the database schema
 --  At every post request to try login or signup we connect to the database and we do what its need
 --  For search we do a query and return the results to the front
-
+--  To add a friend at the database we have the user_id (the person who made) and the friend_id(the person to whom made)
 ##Post Request Status
 --For Login:
     -- 200 ==> Everything is ok
@@ -67,3 +67,4 @@ changeField ==> changes the state we want based on the type
 #Done
 --  Sign Up Form (backend and frontend)
 --  Login Form (backend and frontend)
+-- Search for a friend 
