@@ -144,8 +144,7 @@ class FrontPanelTemplate extends Component{
         return(
             <div>
                 {/* Search */}
-                <div className="accordion container" id="searchAccordion">
-                    
+                <div className="accordion container" id="searchAccordion"> 
                     <div className="card">
                         {/* Button to open */}
                         <div className="card-header text-center" id="header" style={headerStyle}>
@@ -171,13 +170,10 @@ class FrontPanelTemplate extends Component{
                                 </div>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
                 {/* Friend Requests */}
-                <div className="accordion container" id="accordion">
-                    
+                <div className="accordion container" id="accordion">  
                     <div className="card">
                         {/* Button to open */}
                         <div className="card-header text-center" id="header" style={headerStyle}>
@@ -193,13 +189,10 @@ class FrontPanelTemplate extends Component{
                                 Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
                             </div>
                         </div>
-
                     </div>
-
                 </div>
                 {/* Active Ones */}
                 <div className="accordion container" id="accordionSec">
-                    
                     <div className="card">
                         <div className="card-header text-center" id="headerSec"  style={headerStyle}>
                             <h5 className="mb-0">
@@ -216,7 +209,6 @@ class FrontPanelTemplate extends Component{
                         </div>
 
                     </div>
-
                 </div>
                 {/* Friends */}
                 <div className="container">
