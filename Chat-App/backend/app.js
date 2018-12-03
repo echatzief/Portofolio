@@ -194,47 +194,58 @@ app.post('/addFriendByUsername',(req,res)=>{
             }
             var my_user_id=res.rows[0].user_id;
 
-            /* Check if the request exists */
-            text='SELECT * FROM friend_requests where (user_id = $1 and friend_id=$2) or (user_id = $2 and friend_id=$1)';
+            /* Check if the are already friends */
+            text='SELECT * FROM Friends F WHERE (F.user_id=$1 and F.friend_id=$2) or (F.friend_id=$1 and F.user_id=$2) '
             values=[my_user_id,friendID];
+
             client.query(text,values,(err,res)=>{
-                if(err){
-                    console.log(err);
-                }
+                
                 if(res.rows.length==0){
+                    /* Check if the request exists */
+                    text='SELECT * FROM friend_requests where (user_id = $1 and friend_id=$2) or (user_id = $2 and friend_id=$1)';
+                    values=[my_user_id,friendID];
+                    client.query(text,values,(err,res)=>{
+                        if(err){
+                            console.log(err);
+                        }
+                        if(res.rows.length==0){
 
-                    /* Add if the request doesnt exists */
-                    text="SELECT coalesce(max(count), 0) FROM Friend_requests";
-                    client.query(text,(err,res)=>{
+                            /* Add if the request doesnt exists */
+                            text="SELECT coalesce(max(count), 0) FROM Friend_requests";
+                            client.query(text,(err,res)=>{
 
-                        if(res.rows.length >0){
-                            var count=res.rows[0].coalesce+1;
+                                if(res.rows.length >0){
+                                    var count=res.rows[0].coalesce+1;
+                                    
+                                    text="INSERT INTO friend_requests(count,user_id,friend_id,status) VALUES($3,$1,$2,'NOT ACCEPTED')";
+                                    values=[my_user_id,friendID,count];
+                                    client.query(text,values,(err,res)=>{
+                                        if(err){
+                                            console.log(err);
+                                        }
+                                        console.log("Friend request made.");
+                                        
+                                        /* Inform all customers that friend request send */
+                                        var where={
+                                            from:myUsername,
+                                            to:usernameOfFriend,
+                                        }
+                                        io.emit('refreshFriendRequestList',where);
+                                    })
+                                }
                             
-                            text="INSERT INTO friend_requests(count,user_id,friend_id,status) VALUES($3,$1,$2,'NOT ACCEPTED')";
-                            values=[my_user_id,friendID,count];
-                            client.query(text,values,(err,res)=>{
-                                if(err){
-                                    console.log(err);
-                                }
-                                console.log("Friend request made.");
-                                
-                                /* Inform all customers that friend request send */
-                                var where={
-                                    from:myUsername,
-                                    to:usernameOfFriend,
-                                }
-                                io.emit('refreshFriendRequestList',where);
                             })
                         }
-                    
-                    })
+                        else{
+                            console.log("Friend request exists");
+                        }
+                        response.sendStatus(200);
+                    });
                 }
                 else{
-                    console.log("Friend request exists");
+                    console.log("They are already friends.");
                 }
-                response.sendStatus(200);
             });
-
         })
     })
 })
