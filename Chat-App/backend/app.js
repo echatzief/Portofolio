@@ -5,6 +5,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var PORT = process.env.PORT || 8000;
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
 
 /* Postgresql Module */
 const { Pool, Client } = require('pg');
@@ -20,9 +24,6 @@ const client = new Client({
 
 /* Connect to the database */
 client.connect();
-
-
-var app = express();
 
 // view engine setup
 
@@ -216,6 +217,13 @@ app.post('/addFriendByUsername',(req,res)=>{
                                     console.log(err);
                                 }
                                 console.log("Friend request made.");
+                                
+                                /* Inform all customers that friend request send */
+                                var where={
+                                    from:myUsername,
+                                    to:usernameOfFriend,
+                                }
+                                io.emit('refreshFriendRequestList',where);
                             })
                         }
                     
@@ -337,6 +345,12 @@ app.post('/removeRequest',(req,res)=>{
                     console.log(err);
                 }
                 response.sendStatus(200);
+                /* Inform all customers that friend request send */
+                 var where={
+                    from:usernameWhoMade,
+                    to:usernameWhoReceive,
+                }
+                io.emit('refreshFriendRequestList',where);
             })
         }
         else{
@@ -393,6 +407,12 @@ app.post('/changeStatus',(req,res)=>{
                                 console.log(err);
                             }
                             console.log("Friend has been added.");
+                            /* Inform all customers that friend request send */
+                            var where={
+                                from:usernameWhoMade,
+                                to:usernameWhoReceive,
+                            }
+                            io.emit('refreshFriendRequestList',where);
                         })
                     }
                 
@@ -423,6 +443,12 @@ app.post('/changeStatus',(req,res)=>{
                         console.log(err);
                     }
                     response.sendStatus(200);
+                    /* Inform all customers that friend request send */
+                    var where={
+                        from:usernameWhoMade,
+                        to:usernameWhoReceive,
+                    }
+                    io.emit('refreshFriendRequestList',where);
                 })
             }
             else{
@@ -432,10 +458,12 @@ app.post('/changeStatus',(req,res)=>{
         });
     }
 });
+
+/*--------------------------------------------- SOCKETS -----------------------------------------------*/
+
+
 /* Run the app */
-app.listen(PORT,()=>{
-    console.log("App is running at port: "+PORT);
+http.listen(PORT,()=>{
+    console.log("Start app at port: "+PORT);
 });
-
-
 module.exports = app;

@@ -2,6 +2,7 @@ import React,{Component} from 'react';
 import { mainPanelStore } from '../store/mainPanelStore';
 import {changeField} from '../actions/mainPanelAct';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 
 const headerStyle ={
@@ -28,6 +29,13 @@ const  results = {
 
 class FrontPanelTemplate extends Component{
 
+    constructor(props){
+        super(props);
+
+        /* Open a socket with the backend */
+        this.socket=io();
+    }
+
     componentDidMount(){
 
         /* Clear all the fields */
@@ -45,9 +53,19 @@ class FrontPanelTemplate extends Component{
         console.log("Uname: "+uname);
         console.log("Current user: "+mainPanelStore.getState().currentUser);
         /* Get the friend requests */
-        this.getTheFriendRequests();
+        this.getTheFriendRequest();
         /* Get the active ones */
         /* Get the friends */
+
+        /* Refresh friend requests */
+        this.socket.on('refreshFriendRequestList',message=>{
+            console.log("Out of if");
+            console.log(message);
+            if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
+                console.log("Inside Sockets");
+                this.getTheFriendRequest();
+            }
+        });
     }
 
     searchWithEnter = (e)=>{
@@ -56,7 +74,7 @@ class FrontPanelTemplate extends Component{
         }
     }
 
-    getTheFriendRequests = ()=>{
+    getTheFriendRequest=()=>{
 
         /* Request the backend to send all my friend requests */
         var username=mainPanelStore.getState().currentUser;

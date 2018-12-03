@@ -56,7 +56,7 @@ changeField ==> changes the state we want based on the type
 
 
 ##To Do :
---  Na ftiaxw socket pou tha ananewnei automata ta requests
+--  Ama ton kanw add na tsekarei ta friend request kai na mhn ton kanei
 --  Na ftiaxw to UI gia to main kai ta mhnhmata
 --  Na ftiaxw na mporei na kanei request gia na kanei add filous
 --  Na mporei na aporiptei friend request 
