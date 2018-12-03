@@ -9,9 +9,10 @@ CREATE TABLE Friend_Requests (
 
 -- Table: Friends
 CREATE TABLE Friends (
+    Count int NOT NULL,
     User_ID int  NOT NULL,
     Friend_ID int  NOT NULL,
-    CONSTRAINT Friends_pk PRIMARY KEY (User_ID)
+    CONSTRAINT Friends_pk PRIMARY KEY (Count)
 );
 
 -- Table: Messages

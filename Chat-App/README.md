@@ -56,7 +56,7 @@ changeField ==> changes the state we want based on the type
 
 
 ##To Do :
---  Na ftiaxw ta accept/decline
+--  Na ftiaxw socket pou tha ananewnei automata ta requests
 --  Na ftiaxw to UI gia to main kai ta mhnhmata
 --  Na ftiaxw na mporei na kanei request gia na kanei add filous
 --  Na mporei na aporiptei friend request 
@@ -71,3 +71,4 @@ changeField ==> changes the state we want based on the type
 --  Login Form (backend and frontend)
 -- Search for a friend
 -- Render requests 
+-- Friend request

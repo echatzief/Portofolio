@@ -312,6 +312,126 @@ app.post('/getFriendRequest',(req,res)=>{
         })
     })
 })
+/* Remove request from the database */
+app.post('/removeRequest',(req,res)=>{
+    var response=res;
+
+    var usernameWhoMade=req.body.usernameWhoMade;
+    var usernameWhoReceive=req.body.usernameWhoReceive;
+
+    var text ='SELECT count from Friend_requests F WHERE F.user_id='+
+    '(SELECT user_id FROM USERS U WHERE U.username=$1) and F.friend_id='+
+    '(SELECT user_id FROM USERS U WHERE U.username=$2)'
+    var values=[usernameWhoMade,usernameWhoReceive];
+
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        if(res.rows.length >0){
+            console.log(res.rows);
+            text ='DELETE FROM friend_requests WHERE count=$1';
+            values=[res.rows[0].count];
+            client.query(text,values,(err,res)=>{
+                if(err){
+                    console.log(err);
+                }
+                response.sendStatus(200);
+            })
+        }
+        else{
+            console.log("No results");
+            response.sendStatus(400);
+        }
+    });
+})
+
+/* Accept or decline a request */
+app.post('/changeStatus',(req,res)=>{
+
+    /* Get the type */
+    var type = req.body.type;
+    var response=res;
+    var usernameWhoMade=req.body.usernameWhoMade;
+    var usernameWhoReceive=req.body.usernameWhoReceive;
+
+    if(type==="Accept"){
+        var text ='SELECT count,F.user_id,F.friend_id from Friend_requests F WHERE F.user_id='+
+        '(SELECT user_id FROM USERS U WHERE U.username=$1) and F.friend_id='+
+        '(SELECT user_id FROM USERS U WHERE U.username=$2)'
+        var values=[usernameWhoMade,usernameWhoReceive];
+
+        client.query(text,values,(err,res)=>{
+            if(err){
+                console.log(err);
+            }
+            if(res.rows.length >0){
+                
+                var user_id=res.rows[0].user_id;
+                var friend_id=res.rows[0].friend_id;
+
+                /* Update the friend requests table */
+                text ='UPDATE friend_requests SET status =$1 WHERE count=$2;';
+                values=["ACCEPTED",res.rows[0].count];
+                client.query(text,values,(err,res)=>{
+                    if(err){
+                        console.log(err);
+                    }
+                    response.sendStatus(200);
+                })
+               
+                text="SELECT coalesce(max(count), 0) FROM friends";
+                client.query(text,(err,res)=>{
+
+                    if(res.rows.length >0){
+                        var count=res.rows[0].coalesce+1;
+                        
+                        text="INSERT INTO friends(count,user_id,friend_id) VALUES($3,$1,$2)";
+                        values=[user_id,friend_id,count];
+                        client.query(text,values,(err,res)=>{
+                            if(err){
+                                console.log(err);
+                            }
+                            console.log("Friend has been added.");
+                        })
+                    }
+                
+                })
+            }
+            else{
+                console.log("No results");
+                response.sendStatus(400);
+            }
+        });
+    }
+    else if(type==="Decline"){
+        var text ='SELECT count from Friend_requests F WHERE F.user_id='+
+        '(SELECT user_id FROM USERS U WHERE U.username=$1) and F.friend_id='+
+        '(SELECT user_id FROM USERS U WHERE U.username=$2)'
+        var values=[usernameWhoMade,usernameWhoReceive];
+
+        client.query(text,values,(err,res)=>{
+            if(err){
+                console.log(err);
+            }
+            if(res.rows.length >0){
+                console.log(res.rows);
+                text ='UPDATE friend_requests SET status =$1 WHERE count=$2;';
+                values=["DECLINED",res.rows[0].count];
+                client.query(text,values,(err,res)=>{
+                    if(err){
+                        console.log(err);
+                    }
+                    response.sendStatus(200);
+                })
+            }
+            else{
+                console.log("No results");
+                response.sendStatus(400);
+            }
+        });
+    }
+});
 /* Run the app */
 app.listen(PORT,()=>{
     console.log("App is running at port: "+PORT);

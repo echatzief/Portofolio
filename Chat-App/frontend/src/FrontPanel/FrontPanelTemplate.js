@@ -35,8 +35,7 @@ class FrontPanelTemplate extends Component{
 
         /* Get the full URL */
         var fullURL=window.location.href;
-        mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
-
+    
         /* Get the username  from url*/
         var fullURLSplit=fullURL.split("/");
         var uname=fullURLSplit[4].trim();
@@ -72,43 +71,78 @@ class FrontPanelTemplate extends Component{
         })
     }
 
+    removeRequest = (e) =>{
+        console.log("Show Data: "+e.target.id);
+
+        /* Get the two parameters */
+        var splitTarget=e.target.id.split(":");
+        var usernameWhoMade=splitTarget[0];
+        var usernameWhoReceive=splitTarget[1];
+
+        axios.post('/removeRequest',{usernameWhoMade,usernameWhoReceive})
+        .then(res=>{
+            console.log(res);
+        })
+    }
+
+    changeStatus = (e,type)=>{
+
+        var splitTarget=e.target.id.split(":");
+        var usernameWhoMade=splitTarget[0];
+        var usernameWhoReceive=splitTarget[1];
+
+        if(type==="Accept"){
+            axios.post('/changeStatus',{type,usernameWhoMade,usernameWhoReceive})
+            .then(res=>{
+                console.log(res);
+            })
+        }
+        else{
+            axios.post('/changeStatus',{type,usernameWhoMade,usernameWhoReceive})
+            .then(res=>{
+                console.log(res);
+            })
+        }
+    }
+
     createTheFriendRequestResults = (item)=>{
+        var data=item.from+":"+item.username;
         if(item.from===mainPanelStore.getState().currentUser){
-            if(item.status=="NOT ACCEPTED"){
+            if(item.status==="NOT ACCEPTED"){
                 return(
                     <div>
                         <h4>Waiting {item.username} to see your friend request.    
-                            <button type="button" class="btn btn-danger">Cancel</button>
+                            <button type="button" id={data} className="btn btn-danger" onClick={this.removeRequest}>Cancel</button>
                         </h4>
                     </div>
                 );
             }
-            else if(item.status=="ACCEPTED"){
+            else if(item.status==="ACCEPTED"){
                 return(
                     <div>
                         <h4>{item.username} has been your friend from now.  
-                            <button type="button" class="btn btn-danger">Remove Note</button>
+                            <button type="button" id={data} className="btn btn-danger"  onClick={this.removeRequest} >Remove Note</button>
                         </h4>
                     </div>
                 );
             }
-            else if(item.status=="DECLINED"){
+            else if(item.status==="DECLINED"){
                 return(
                     <div>
                         <h4>{item.username} declined your request.  
-                            <button type="button" class="btn btn-danger">Remove Note</button>
+                            <button type="button" id={data} className="btn btn-danger"  onClick={this.removeRequest} >Remove Note</button>
                         </h4>
                     </div>
                 ); 
             }
         }
         else{
-            if(item.status=="NOT ACCEPTED"){
+            if(item.status==="NOT ACCEPTED"){
                 return(
                     <div>
                         <h4>{item.from} wants to add you as friend.   
-                            <button type="button" class="btn btn-success">Accept</button>
-                            <button type="button" class="btn btn-danger">Decline</button>
+                            <button type="button" id={data} className="btn btn-success" onClick={e=>this.changeStatus(e,"Accept")}>Accept</button>
+                            <button type="button"  id={data} className="btn btn-danger" onClick={e=>this.changeStatus(e,"Decline")}>Decline</button>
                         </h4>
                     </div>
                 );
