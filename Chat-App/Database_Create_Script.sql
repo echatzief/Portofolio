@@ -1,9 +1,10 @@
 -- Table: Friend_Requests
 CREATE TABLE Friend_Requests (
+    Count int NOT NULL,
     User_ID int  NOT NULL,
     Friend_ID int  NOT NULL,
     Status char(255)  NOT NULL,
-    CONSTRAINT Friend_Requests_pk PRIMARY KEY (User_ID)
+    CONSTRAINT Friend_Requests_pk PRIMARY KEY (Count)
 );
 
 -- Table: Friends

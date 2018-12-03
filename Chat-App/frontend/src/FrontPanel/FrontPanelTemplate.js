@@ -30,9 +30,13 @@ class FrontPanelTemplate extends Component{
 
     componentDidMount(){
 
+        /* Clear all the fields */
+        mainPanelStore.dispatch(changeField("CLEAR_FIELDS",''));
+
         /* Get the full URL */
         var fullURL=window.location.href;
-        
+        mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
+
         /* Get the username  from url*/
         var fullURLSplit=fullURL.split("/");
         var uname=fullURLSplit[4].trim();
@@ -60,7 +64,56 @@ class FrontPanelTemplate extends Component{
         axios.post('/getFriendRequest',{username})
         .then(res=>{
             console.log(res);
+
+            /* Save the friend requests */
+            mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",res.data));
+            console.log("Requests: ");
+            console.log(mainPanelStore.getState().friendRequests);
         })
+    }
+
+    createTheFriendRequestResults = (item)=>{
+        if(item.from===mainPanelStore.getState().currentUser){
+            if(item.status=="NOT ACCEPTED"){
+                return(
+                    <div>
+                        <h4>Waiting {item.username} to see your friend request.    
+                            <button type="button" class="btn btn-danger">Cancel</button>
+                        </h4>
+                    </div>
+                );
+            }
+            else if(item.status=="ACCEPTED"){
+                return(
+                    <div>
+                        <h4>{item.username} has been your friend from now.  
+                            <button type="button" class="btn btn-danger">Remove Note</button>
+                        </h4>
+                    </div>
+                );
+            }
+            else if(item.status=="DECLINED"){
+                return(
+                    <div>
+                        <h4>{item.username} declined your request.  
+                            <button type="button" class="btn btn-danger">Remove Note</button>
+                        </h4>
+                    </div>
+                ); 
+            }
+        }
+        else{
+            if(item.status=="NOT ACCEPTED"){
+                return(
+                    <div>
+                        <h4>{item.from} wants to add you as friend.   
+                            <button type="button" class="btn btn-success">Accept</button>
+                            <button type="button" class="btn btn-danger">Decline</button>
+                        </h4>
+                    </div>
+                );
+            }
+        }
     }
     getTheActiveOnes = ()=>{
 
@@ -189,7 +242,7 @@ class FrontPanelTemplate extends Component{
                         {/* Friend Requests Data */}
                         <div id="collapseOne" className="collapse show" aria-labelledby="header" data-parent="#accordion" >
                             <div className="card-body">
-                               Hi
+                               <ul>{mainPanelStore.getState().friendRequests.map((item)=>this.createTheFriendRequestResults(item))}</ul>
                             </div>
                         </div>
                     </div>

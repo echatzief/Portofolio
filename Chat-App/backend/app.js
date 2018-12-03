@@ -25,8 +25,6 @@ client.connect();
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
 app.use(favicon());
 app.use(logger('dev'));
@@ -203,14 +201,24 @@ app.post('/addFriendByUsername',(req,res)=>{
                     console.log(err);
                 }
                 if(res.rows.length==0){
+
                     /* Add if the request doesnt exists */
-                    text="INSERT INTO friend_requests(user_id,friend_id,status) VALUES($1,$2,'NOT ACCEPTED')";
-                    values=[my_user_id,friendID];
-                    client.query(text,values,(err,res)=>{
-                        if(err){
-                            console.log(err);
+                    text="SELECT coalesce(max(count), 0) FROM Friend_requests";
+                    client.query(text,(err,res)=>{
+
+                        if(res.rows.length >0){
+                            var count=res.rows[0].coalesce+1;
+                            
+                            text="INSERT INTO friend_requests(count,user_id,friend_id,status) VALUES($3,$1,$2,'NOT ACCEPTED')";
+                            values=[my_user_id,friendID,count];
+                            client.query(text,values,(err,res)=>{
+                                if(err){
+                                    console.log(err);
+                                }
+                                console.log("Friend request made.");
+                            })
                         }
-                        console.log("Friend request made.");
+                    
                     })
                 }
                 else{
@@ -230,7 +238,7 @@ app.post('/getFriendRequest',(req,res)=>{
     var response=res;
 
     /* Get the request that i did */
-    var text='SELECT username FROM Users U WHERE U.user_id='
+    var text='SELECT username , F.status FROM Users U,friend_requests F WHERE F.friend_id=U.user_id and U.user_id in '
     +'( SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id and U.user_id='
     +'(SELECT user_id FROM Users U WHERE U.username=$1));';
     var values=[usernameOfMe];
@@ -239,7 +247,7 @@ app.post('/getFriendRequest',(req,res)=>{
         if(err){
             console.log(err);
         }
-        //console.log(res.rows);
+       // console.log(res.rows);
 
         var requestsFromMe = new Array();
 
@@ -250,12 +258,13 @@ app.post('/getFriendRequest',(req,res)=>{
             var temp = {
                 username:res.rows[i].username.trim(),
                 from:usernameOfMe,
+                status:res.rows[i].status.trim(),
             }
             requestsFromMe.push(temp);
         }
-        text='SELECT username FROM Users U WHERE U.user_id='
-        +'( SELECT F.user_id FROM friend_requests F, users U WHERE F.user_id='
-        +'U.user_id and F.friend_id=(SELECT user_id FROM Users U WHERE U.username=$1));';
+        text='SELECT DISTINCT username,F.status FROM Users U,Friend_requests F WHERE  U.user_id=F.user_id and U.user_id in'+
+        '(SELECT F.user_id FROM friend_requests F, users U WHERE F.friend_id='+
+        'U.user_id and F.friend_id=(SELECT user_id FROM Users U WHERE U.username=$1));';
         values=[usernameOfMe];
         
         client.query(text,values,(err,res)=>{
@@ -274,6 +283,7 @@ app.post('/getFriendRequest',(req,res)=>{
                 var temp = {
                     username:usernameOfMe,
                     from:res.rows[i].username.trim(),
+                    status:res.rows[i].status.trim(),
                 }
                 requestsToMe.push(temp);
             }

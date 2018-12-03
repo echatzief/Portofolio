@@ -42,6 +42,7 @@ changeField ==> changes the state we want based on the type
 --  At every post request to try login or signup we connect to the database and we do what its need
 --  For search we do a query and return the results to the front
 --  To add a friend at the database we have the user_id (the person who made) and the friend_id(the person to whom made)
+--  Send to the user the friend request he gets or does
 ##Post Request Status
 --For Login:
     -- 200 ==> Everything is ok
@@ -55,6 +56,7 @@ changeField ==> changes the state we want based on the type
 
 
 ##To Do :
+--  Na ftiaxw ta accept/decline
 --  Na ftiaxw to UI gia to main kai ta mhnhmata
 --  Na ftiaxw na mporei na kanei request gia na kanei add filous
 --  Na mporei na aporiptei friend request 
@@ -67,4 +69,5 @@ changeField ==> changes the state we want based on the type
 #Done
 --  Sign Up Form (backend and frontend)
 --  Login Form (backend and frontend)
--- Search for a friend 
+-- Search for a friend
+-- Render requests 
