@@ -79,6 +79,7 @@ class FrontPanelTemplate extends Component{
         }{/* Friends */}
     }
 
+    /* Get the friend request */
     getTheFriendRequest=()=>{
 
         /* Request the backend to send all my friend requests */
@@ -94,6 +95,7 @@ class FrontPanelTemplate extends Component{
         })
     }
 
+    /* Remove the friend requests */
     removeRequest = (e) =>{
         console.log("Show Data: "+e.target.id);
 
@@ -108,6 +110,7 @@ class FrontPanelTemplate extends Component{
         })
     }
 
+    /* Accept or decline the friend request */
     changeStatus = (e,type)=>{
 
         var splitTarget=e.target.id.split(":");
@@ -187,6 +190,10 @@ class FrontPanelTemplate extends Component{
         })
     }
 
+    /* Remove friends from the list */
+    removeFriendFromList = (e)=>{
+
+    }
     /* Render the friends */
     renderTheFriends = (item)=>{
 
@@ -200,7 +207,7 @@ class FrontPanelTemplate extends Component{
                         {item}
                     </div>
                     <div className="col-sm">
-                        <button type="button" id={item} className="btn btn-danger">Remove</button>
+                        <button type="button" id={item} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
                     </div>
                     <div className="col-sm">
                         <button type="button" id={item} className="btn btn-secondary">Chat</button>
