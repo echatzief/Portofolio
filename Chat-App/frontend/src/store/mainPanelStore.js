@@ -6,6 +6,7 @@ const initialState={
     searchResults:[],   /* Results of the search */
     currentUser:'',     /* Current user */
     friendRequests:[],   /* Friend Requests */
+    friends:[],         /* Friends we have */
 }
 
 export const mainPanelStore=createStore(reducer,initialState);

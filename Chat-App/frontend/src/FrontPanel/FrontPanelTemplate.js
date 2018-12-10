@@ -13,9 +13,6 @@ const headerButtonStyle={
     color:'#fff',
     borderColor:'#fff',
 }
-const friendStyle={
-    backgroundColor:'#93b0c9',
-}
 const searchBox={
     width:'60%',
 }
@@ -50,20 +47,28 @@ class FrontPanelTemplate extends Component{
 
         /* Set the current user */
         mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
-        console.log("Uname: "+uname);
-        console.log("Current user: "+mainPanelStore.getState().currentUser);
+        
         /* Get the friend requests */
         this.getTheFriendRequest();
+
         /* Get the active ones */
-        /* Get the friends */
+
+        /* Get the your friends */
+        this.getTheFriends();
 
         /* Refresh friend requests */
         this.socket.on('refreshFriendRequestList',message=>{
-            console.log("Out of if");
             console.log(message);
             if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
-                console.log("Inside Sockets");
                 this.getTheFriendRequest();
+            }
+        });
+
+        /* Refresh friend list */
+        this.socket.on('refreshFriendList',message=>{
+            if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
+                console.log('Inside Refresh');
+                this.getTheFriends();
             }
         });
     }
@@ -71,7 +76,7 @@ class FrontPanelTemplate extends Component{
     searchWithEnter = (e)=>{
         if(e.key==='Enter'){
             this.getSearchResults();
-        }
+        }{/* Friends */}
     }
 
     getTheFriendRequest=()=>{
@@ -171,8 +176,38 @@ class FrontPanelTemplate extends Component{
 
     }
 
+    /* Get the friends */
     getTheFriends = ()=>{
+        var username=mainPanelStore.getState().currentUser;
+        axios.post('/getFriends',{username})
+        .then(res=>{
+            /* Set the friends */
+            console.log(res.data);
+            mainPanelStore.dispatch(changeField("SET_FRIENDS",res.data));
+        })
+    }
 
+    /* Render the friends */
+    renderTheFriends = (item)=>{
+
+        const contStyle={
+            marginTop:'2%',
+        }
+        return(
+            <div className="container" style={contStyle}>
+                <div className="row">
+                    <div className="col-sm">
+                        {item}
+                    </div>
+                    <div className="col-sm">
+                        <button type="button" id={item} className="btn btn-danger">Remove</button>
+                    </div>
+                    <div className="col-sm">
+                        <button type="button" id={item} className="btn btn-secondary">Chat</button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     /* Clear the search box */
@@ -299,29 +334,23 @@ class FrontPanelTemplate extends Component{
                         </div>
                     </div>
                 </div>
-                {/* Active Ones */}
+                {/* Friends  */}
                 <div className="accordion container" id="accordionSec">
                     <div className="card">
                         {/* Button to open */}
                         <div className="card-header text-center" id="headerSec"  style={headerStyle}>
                             <h5 className="mb-0">
                                 <button  style={headerButtonStyle} className="btn" data-toggle="collapse" data-target="#collapsSec" aria-expanded="false" aria-controls="collapsSec">
-                                    Active 
+                                    Friends
                                 </button>
                             </h5>
                         </div>
                         {/* Friend Requests Data */}
                         <div id="collapsSec" className="collapse show" aria-labelledby="headerSec" data-parent="#accordionSec">
                             <div className="card-body">
-                                Hi.
+                                <ul>{mainPanelStore.getState().friends.map((item)=>this.renderTheFriends(item))}</ul>
                             </div>
                         </div>
-                    </div>
-                </div>
-                {/* Friends */}
-                <div className="container">
-                    <div style={friendStyle}>
-                        <p>Friends</p>
                     </div>
                 </div>
             </div>

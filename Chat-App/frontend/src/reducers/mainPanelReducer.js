@@ -6,6 +6,7 @@ export default(state,action)=>{
                 searchResults:state.searchResults,
                 currentUser:action.data,
                 friendRequests:state.friendRequests,
+                friends:state.friends,
             };
         case "CHANGE_SEARCH_BOX":
             return{
@@ -13,6 +14,7 @@ export default(state,action)=>{
                 searchResults:state.searchResults,
                 currentUser:state.currentUser,
                 friendRequests:state.friendRequests,
+                friends:state.friends,
             };
         case "CHANGE_SEARCH_RESULTS":
             return{
@@ -20,6 +22,7 @@ export default(state,action)=>{
                 searchResults:action.data,
                 currentUser:state.currentUser,
                 friendRequests:state.friendRequests,
+                friends:state.friends,
             };
         case "GET_FRIEND_REQUESTS":
             return{
@@ -27,13 +30,23 @@ export default(state,action)=>{
                 searchResults:state.searchResults,
                 currentUser:state.currentUser,
                 friendRequests:action.data,
+                friends:state.friends,
+            }
+        case "SET_FRIENDS":
+            return{
+                searchBox:state.searchBox,      
+                searchResults:state.searchResults,
+                currentUser:state.currentUser,
+                friendRequests:state.friendRequests,
+                friends:action.data,
             }
         case "CLEAR_FIELDS":
             return{
                 searchBox:'',       
                 searchResults:[],   
                 currentUser:'',     
-                friendRequests:[],  
+                friendRequests:[], 
+                friends:[],
             }
         default: return state;
     }

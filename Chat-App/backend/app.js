@@ -257,9 +257,10 @@ app.post('/getFriendRequest',(req,res)=>{
     var response=res;
 
     /* Get the request that i did */
-    var text='SELECT username , F.status FROM Users U,friend_requests F WHERE F.friend_id=U.user_id and U.user_id in '
-    +'( SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id and U.user_id='
-    +'(SELECT user_id FROM Users U WHERE U.username=$1));';
+    var text='SELECT username,F.status from USERS U,friend_requests F WHERE F.friend_id=U.user_id '+
+    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1) and U.user_id in('+
+    'SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id '+
+    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1));'
     var values=[usernameOfMe];
     
     client.query(text,values,(err,res)=>{
@@ -290,7 +291,7 @@ app.post('/getFriendRequest',(req,res)=>{
             if(err){
                 console.log(err);
             }
-           // console.log(requestsFromMe);
+           //console.log(requestsFromMe);
            //console.log(res.rows);
 
             var requestsToMe = new Array();
@@ -424,6 +425,7 @@ app.post('/changeStatus',(req,res)=>{
                                 to:usernameWhoReceive,
                             }
                             io.emit('refreshFriendRequestList',where);
+                            io.emit('refreshFriendList',where);
                         })
                     }
                 
@@ -469,6 +471,32 @@ app.post('/changeStatus',(req,res)=>{
         });
     }
 });
+
+/* Get friends */
+app.post('/getFriends',(req,res)=>{
+
+    /* Get the parameters */
+    var username=req.body.username;
+    var response=res;
+
+    /* Get the friends with a query */
+    var text ='SELECT username FROM USERS WHERE user_id IN('+
+        'SELECT F.friend_id FROM Friends F WHERE F.user_id IN (SELECT user_id FROM USERS WHERE username=$1)'+ 
+        'UNION'+
+        ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1))'
+    var values=[username];
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+
+        var friendArray = new Array();
+        for(var i=0;i<res.rows.length;i++){
+            friendArray.push(res.rows[i].username.trim());
+        }
+        response.send(friendArray);
+    })
+})
 
 /*--------------------------------------------- SOCKETS -----------------------------------------------*/
 
