@@ -7,6 +7,7 @@ export default(state,action)=>{
                 currentUser:action.data,
                 friendRequests:state.friendRequests,
                 friends:state.friends,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
             };
         case "CHANGE_SEARCH_BOX":
             return{
@@ -15,6 +16,7 @@ export default(state,action)=>{
                 currentUser:state.currentUser,
                 friendRequests:state.friendRequests,
                 friends:state.friends,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
             };
         case "CHANGE_SEARCH_RESULTS":
             return{
@@ -23,6 +25,7 @@ export default(state,action)=>{
                 currentUser:state.currentUser,
                 friendRequests:state.friendRequests,
                 friends:state.friends,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
             };
         case "GET_FRIEND_REQUESTS":
             return{
@@ -31,6 +34,7 @@ export default(state,action)=>{
                 currentUser:state.currentUser,
                 friendRequests:action.data,
                 friends:state.friends,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
             }
         case "SET_FRIENDS":
             return{
@@ -39,6 +43,16 @@ export default(state,action)=>{
                 currentUser:state.currentUser,
                 friendRequests:state.friendRequests,
                 friends:action.data,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+            }
+        case "SET_FRIEND_REQUESTS_REMAINING_PAGES":
+            return{
+                searchBox:state.searchBox,      
+                searchResults:state.searchResults,
+                currentUser:state.currentUser,
+                friendRequests:state.friendRequests,
+                friends:state.friends,
+                friendRequestsRemainingPages:action.data,
             }
         case "CLEAR_FIELDS":
             return{
@@ -47,6 +61,7 @@ export default(state,action)=>{
                 currentUser:'',     
                 friendRequests:[], 
                 friends:[],
+                friendRequestsRemainingPages:0,
             }
         default: return state;
     }

@@ -1,29 +1,16 @@
 import React,{Component} from 'react';
 import { mainPanelStore } from '../store/mainPanelStore';
+import SearchBar from './SearchBar';
+import FriendRequests from './FriendRequests';
+import Friends from './Friends';
 import {changeField} from '../actions/mainPanelAct';
 import axios from 'axios';
+import $ from 'jquery';
 import io from 'socket.io-client';
 
-
-const headerStyle ={
-    backgroundColor:'#2E7DB5',
-}
-const headerButtonStyle={
-    backgroundColor:'transparent',
-    color:'#fff',
-    borderColor:'#fff',
-}
-const searchBox={
-    width:'60%',
-}
-const searchButton={
-    marginTop:'3%',
-}
 const  results = {
     marginTop:'4%',
 }
-
-
 class FrontPanelTemplate extends Component{
 
     constructor(props){
@@ -31,6 +18,8 @@ class FrontPanelTemplate extends Component{
 
         /* Open a socket with the backend */
         this.socket=io();
+
+        this.pageLimit=20;
     }
 
     componentDidMount(){
@@ -47,11 +36,9 @@ class FrontPanelTemplate extends Component{
 
         /* Set the current user */
         mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
-        
-        /* Get the friend requests */
-        this.getTheFriendRequest();
 
-        /* Get the active ones */
+        /* Get the pages of friend requests */
+        this.getFriendRequestPages();
 
         /* Get the your friends */
         this.getTheFriends();
@@ -60,7 +47,8 @@ class FrontPanelTemplate extends Component{
         this.socket.on('refreshFriendRequestList',message=>{
             console.log(message);
             if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
-                this.getTheFriendRequest();
+                console.log("INside");
+                this.getFriendRequestPages();
             }
         });
 
@@ -73,27 +61,97 @@ class FrontPanelTemplate extends Component{
         });
     }
 
-    searchWithEnter = (e)=>{
-        if(e.key==='Enter'){
-            this.getSearchResults();
-        }{/* Friends */}
-    }
+    /* ---------------------------------------- Friend Requests ----------------------------------*/
 
-    /* Get the friend request */
-    getTheFriendRequest=()=>{
+    /* Get the request pages */
+    getFriendRequestPages = ()=>{
 
-        /* Request the backend to send all my friend requests */
         var username=mainPanelStore.getState().currentUser;
-        axios.post('/getFriendRequest',{username})
-        .then(res=>{
-            console.log(res);
+        var pagesLimit=this.pageLimit;
 
-            /* Save the friend requests */
-            mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",res.data));
-            console.log("Requests: ");
-            console.log(mainPanelStore.getState().friendRequests);
+        axios.post('/getFriendRequestPages',{username,pagesLimit})
+        .then(res=>{
+
+            console.log("Pages we receive: "+res.data.friendRequestPages);
+
+            /* Set the friend request pages */
+            mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",res.data.friendRequestPages));
+        
+            /* Get the friend requests */
+            username=mainPanelStore.getState().currentUser;
+            pagesLimit=this.pageLimit;
+            var requestedPage=mainPanelStore.getState().friendRequestsRemainingPages;
+
+            /* We request if page is positive */
+            if(res.data.friendRequestPages > 0){
+                console.log("We request the page: "+requestedPage);
+
+                axios.post('/getFriendRequest',{username,pagesLimit,requestedPage})
+                .then(res=>{
+
+                    /* Save the friend requests */
+                    mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",res.data));
+
+                    /* Reduce the remaining states */
+                    mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",mainPanelStore.getState().friendRequestsRemainingPages-1));
+                })
+            } 
+            else{
+                mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",[]));
+            }
         })
     }
+
+    /* Scroll and get next friend requests */
+    scrollandGetFriendRequest(){
+
+        var username=mainPanelStore.getState().currentUser;
+        var pagesLimit=this.pageLimit;
+        var requestedPage=mainPanelStore.getState().friendRequestsRemainingPages;
+
+        axios.post('/getFriendRequest',{username,pagesLimit,requestedPage})
+        .then(res=>{
+    
+            console.log("We request the page: "+requestedPage);
+
+            /* Push the old ones */
+            var allRequests= new Array();
+            for(var i=0;i<mainPanelStore.getState().friendRequests.length;i++){
+                console.log(mainPanelStore.getState().friendRequests[i]);
+                allRequests.push(mainPanelStore.getState().friendRequests[i]);
+            }
+
+            /* Push the new ones */
+            for(i=0;i<res.data.length;i++){
+                allRequests.push(res.data[i]);
+            }
+
+            /* Save the friend requests */
+            mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",allRequests));
+
+            /* Reduce the remaining states */
+            mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",mainPanelStore.getState().friendRequestsRemainingPages-1));
+        })
+    }
+
+    /* Check to fetch friend requests */
+    checkToFetch = (e)=>{
+        e.preventDefault();
+        var div = $('#messageDiv');
+        if (div[0].scrollHeight - div.scrollTop() == div.height())
+        {
+            console.log("Reached Bottom");
+            console.log("Remaining: "+mainPanelStore.getState().friendRequestsRemainingPages);
+
+            if(mainPanelStore.getState().friendRequestsRemainingPages > 0){
+                this.scrollandGetFriendRequest();
+            }
+        }
+    }
+
+    /* ---------------------------------------- Friend Requests ----------------------------------*/
+
+    /* --------------------------------------- Handle Friend Requests ----------------------------*/
 
     /* Remove the friend requests */
     removeRequest = (e) =>{
@@ -131,13 +189,17 @@ class FrontPanelTemplate extends Component{
         }
     }
 
+    /* --------------------------------------- Handle Friend Requests ----------------------------*/
+
+    /* --------------------------------------- Render Items --------------------------------------*/
     createTheFriendRequestResults = (item)=>{
-        var data=item.from+":"+item.username;
+        var data=item.from+":"+item.to;
+
         if(item.from===mainPanelStore.getState().currentUser){
             if(item.status==="NOT ACCEPTED"){
                 return(
                     <div>
-                        <h4>Waiting {item.username} to see your friend request.    
+                        <h4>Waiting {item.to} to see your friend request.    
                             <button type="button" id={data} className="btn btn-danger" onClick={this.removeRequest}>Cancel</button>
                         </h4>
                     </div>
@@ -146,7 +208,7 @@ class FrontPanelTemplate extends Component{
             else if(item.status==="ACCEPTED"){
                 return(
                     <div>
-                        <h4>{item.username} has been your friend from now.  
+                        <h4>{item.to} has been your friend from now.  
                             <button type="button" id={data} className="btn btn-danger"  onClick={this.removeRequest} >Remove Note</button>
                         </h4>
                     </div>
@@ -173,29 +235,18 @@ class FrontPanelTemplate extends Component{
                     </div>
                 );
             }
+            else if (item.status==="ACCEPTED"){
+                return(
+                    <div>
+                        <h4> You have accepted the request from {item.from}</h4>
+                    </div>
+                );
+            }
         }
     }
-    getTheActiveOnes = ()=>{
 
-    }
-
-    /* Get the friends */
-    getTheFriends = ()=>{
-        var username=mainPanelStore.getState().currentUser;
-        axios.post('/getFriends',{username})
-        .then(res=>{
-            /* Set the friends */
-            console.log(res.data);
-            mainPanelStore.dispatch(changeField("SET_FRIENDS",res.data));
-        })
-    }
-
-    /* Remove friends from the list */
-    removeFriendFromList = (e)=>{
-
-    }
-    /* Render the friends */
-    renderTheFriends = (item)=>{
+     /* Render the friends */
+     renderTheFriends = (item)=>{
 
         const contStyle={
             marginTop:'2%',
@@ -216,15 +267,47 @@ class FrontPanelTemplate extends Component{
             </div>
         );
     }
+    /* --------------------------------------- Render Items --------------------------------------*/
 
-    /* Clear the search box */
-    clearSearchInput(){
-        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
-        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",[]));
+    /* --------------------------------------- Friends -------------------------------------------*/
+
+    /* Get the friends */
+    getTheFriends = ()=>{
+        var username=mainPanelStore.getState().currentUser;
+        var requestedPage=mainPanelStore.getState().friendRequestsRemaining;
+        axios.post('/getFriends',{username,requestedPage})
+        .then(res=>{
+            /* Set the friends */
+            console.log(res.data);
+            mainPanelStore.dispatch(changeField("SET_FRIENDS",res.data));
+        })
     }
-    /* Change the input */
-    changeSearchInput=(e)=>{
-        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",e.target.value));
+
+    /* Add user as a friend */
+    addUserAsFriend = (e)=>{
+
+        /* Get the username of the friend we want to add */
+        var usernameOfFriend = e.target.id;
+        var myUsername=mainPanelStore.getState().currentUser;
+        console.log("Wanna add: "+usernameOfFriend);
+        axios.post('/addFriendByUsername',{usernameOfFriend,myUsername})
+        .then(res=>{
+            console.log(res);
+        })
+    }
+
+    /* Remove friends from the list */
+    removeFriendFromList = (e)=>{
+
+    }
+
+    /* --------------------------------------- Friends -------------------------------------------*/
+    
+    /* --------------------------------------- Search  -------------------------------------------*/
+    searchWithEnter = (e)=>{
+        if(e.key==='Enter'){
+            this.getSearchResults();
+        }{/* Friends */}
     }
 
     /* Get the search results from the server */
@@ -272,94 +355,42 @@ class FrontPanelTemplate extends Component{
             );
         }
     }
+    /* --------------------------------------- Search  -------------------------------------------*/
 
-    /* Add user as a friend */
-    addUserAsFriend = (e)=>{
+    
+    getTheActiveOnes = ()=>{
 
-        /* Get the username of the friend we want to add */
-        var usernameOfFriend = e.target.id;
-        var myUsername=mainPanelStore.getState().currentUser;
-        console.log("Wanna add: "+usernameOfFriend);
-        axios.post('/addFriendByUsername',{usernameOfFriend,myUsername})
-        .then(res=>{
-            console.log(res);
-        })
     }
-   
+    
+    /* Clear the search box */
+    clearSearchInput(){
+        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
+        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_RESULTS",[]));
+    }
+    /* Change the input */
+    changeSearchInput=(e)=>{
+        mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",e.target.value));
+    }
+
+    
+
     render(){
         return(
             <div>
-                {/* Search */}
-                <div className="accordion container" id="searchAccordion">
-                    
-                    <div className="card">
-                        {/* Button to open */}
-                        <div className="card-header text-center" id="header" style={headerStyle}>
-                            <h5 className="mb-0">
-                                <button style={headerButtonStyle} onClick={this.clearSearchInput} className="btn " data-toggle="collapse" data-target="#searchCollapse" aria-expanded="false" aria-controls="searchCollapse">
-                                    Search
-                                </button>
-                            </h5>
-                        </div>
-                        {/* Search Items */}
-                        <div id="searchCollapse" className="collapse show" aria-labelledby="header" data-parent="#searchAccordion" >
-                            <div className="card-body">
-
-                                {/* Search Box */}
-                                <div className="container text-center" style={searchBox}>
-                                    <input type="text" className="form-control" id="searchBox" value={mainPanelStore.getState().searchBox} onKeyPress={this.searchWithEnter} onChange={this.changeSearchInput} placeholder="Username"/>
-                                    <div className="container" style={searchButton}><button type="button" className="btn btn-dark" onClick={this.getSearchResults}>Search</button></div>
-                                </div>
-                            
-                                {/* Search Data */}
-                                <div>        
-                                    {mainPanelStore.getState().searchResults.map(((item,i)=>this.createSearchResult(item,i)))}
-                                </div>
-                                {}
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-                {/* Friend Requests */}
-                <div className="accordion container" id="accordion">
-                    <div className="card">
-                        {/* Button to open */}
-                        <div className="card-header text-center" id="header" style={headerStyle}>
-                            <h5 className="mb-0">
-                                <button style={headerButtonStyle} className="btn " data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                    Friend Requests
-                                </button>
-                            </h5>
-                        </div>
-                        {/* Friend Requests Data */}
-                        <div id="collapseOne" className="collapse show" aria-labelledby="header" data-parent="#accordion" >
-                            <div className="card-body">
-                               <ul>{mainPanelStore.getState().friendRequests.map((item)=>this.createTheFriendRequestResults(item))}</ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* Friends  */}
-                <div className="accordion container" id="accordionSec">
-                    <div className="card">
-                        {/* Button to open */}
-                        <div className="card-header text-center" id="headerSec"  style={headerStyle}>
-                            <h5 className="mb-0">
-                                <button  style={headerButtonStyle} className="btn" data-toggle="collapse" data-target="#collapsSec" aria-expanded="false" aria-controls="collapsSec">
-                                    Friends
-                                </button>
-                            </h5>
-                        </div>
-                        {/* Friend Requests Data */}
-                        <div id="collapsSec" className="collapse show" aria-labelledby="headerSec" data-parent="#accordionSec">
-                            <div className="card-body">
-                                <ul>{mainPanelStore.getState().friends.map((item)=>this.renderTheFriends(item))}</ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <SearchBar
+                    clearSearchInput={this.clearSearchInput}
+                    searchWithEnter={this.searchWithEnter}
+                    changeSearchInput={this.changeSearchInput}
+                    getSearchResults={this.getSearchResults}
+                    createSearchResult={this.createSearchResult}
+                />
+                <FriendRequests
+                    checkToFetch={this.checkToFetch}
+                    createTheFriendRequestResults={this.createTheFriendRequestResults}
+                />
+                <Friends 
+                    renderTheFriends={this.renderTheFriends}
+                />
             </div>
         )
     }

@@ -244,6 +244,7 @@ app.post('/addFriendByUsername',(req,res)=>{
                 }
                 else{
                     console.log("They are already friends.");
+                    response.sendStatus(200);
                 }
             });
         })
@@ -254,84 +255,73 @@ app.post('/addFriendByUsername',(req,res)=>{
 app.post('/getFriendRequest',(req,res)=>{
    
     var usernameOfMe = req.body.username;
+    var pagesLimit=req.body.pagesLimit;
+    var requestedPage=req.body.requestedPage;
     var response=res;
 
-    /* Get the request that i did */
-    var text='SELECT username,F.status from USERS U,friend_requests F WHERE F.friend_id=U.user_id '+
-    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1) and U.user_id in('+
-    'SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id '+
-    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1));'
-    var values=[usernameOfMe];
+    console.log("Username: "+usernameOfMe+" Pages: "+pagesLimit+" Requested: "+requestedPage);
+
+
+    var text='SELECT fromUser.username as fromUser ,toUser.username as toUser, F.status FROM USERS fromUser,USERS toUser,Friend_requests F WHERE '+
+    'fromUser.user_id IN (SELECT user_id FROM Users U WHERE U.username=$1) and F.friend_id=toUser.user_id and F.user_id IN (SELECT user_id FROM Users U WHERE U.username=$1) '+
+    'and F.friend_id IN (SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id '+
+    'and F.user_id IN(SELECT user_id FROM Users U WHERE U.username=$1)) '+
+    'UNION '+ 
+    'SELECT DISTINCT fromUser.username as fromUser,toUser.username as toUser ,F.status FROM Users fromUser,Users toUser,Friend_requests F WHERE '+ 
+    'toUser.user_id IN(SELECT user_id FROM Users U WHERE U.username=$1) and fromUser.user_id=F.user_id  and fromUser.user_id in (SELECT F.user_id FROM friend_requests F, users U WHERE F.friend_id= '+
+    'U.user_id and F.friend_id IN (SELECT user_id FROM Users U WHERE U.username=$1)) '+
+    'LIMIT $2 OFFSET $3';
+    var values=[usernameOfMe,pagesLimit,(requestedPage-1)*pagesLimit];
     
+    /* Get the friend request per page */
     client.query(text,values,(err,res)=>{
         if(err){
             console.log(err);
         }
-       // console.log(res.rows);
 
-        var requestsFromMe = new Array();
-
-        /* Parse the requests i made */
+        var tempArray=new Array();
         for(var i=0;i<res.rows.length;i++){
-            
-            //username: to  from: from 
-            var temp = {
-                username:res.rows[i].username.trim(),
-                from:usernameOfMe,
+            tempArray.push({
+                from:res.rows[i].fromuser.trim(),
+                to:res.rows[i].touser.trim(),
                 status:res.rows[i].status.trim(),
-            }
-            requestsFromMe.push(temp);
+            })
         }
-        text='SELECT DISTINCT username,F.status FROM Users U,Friend_requests F WHERE  U.user_id=F.user_id and U.user_id in'+
-        '(SELECT F.user_id FROM friend_requests F, users U WHERE F.friend_id='+
-        'U.user_id and F.friend_id=(SELECT user_id FROM Users U WHERE U.username=$1));';
-        values=[usernameOfMe];
-        
-        client.query(text,values,(err,res)=>{
-            if(err){
-                console.log(err);
-            }
-           //console.log(requestsFromMe);
-           //console.log(res.rows);
 
-            var requestsToMe = new Array();
-
-            /* Parse the requests i made */
-            for(var i=0;i<res.rows.length;i++){
-                
-                //username: to  from: from 
-                var temp = {
-                    username:usernameOfMe,
-                    from:res.rows[i].username.trim(),
-                    status:res.rows[i].status.trim(),
-                }
-                requestsToMe.push(temp);
-            }
-
-            for(var i=0;i<requestsToMe.length;i++){
-                console.log("To: Me From: "+requestsToMe[i].from);
-            }
-
-            for(var i=0;i<requestsFromMe.length;i++){
-                console.log("To: "+requestsFromMe[i].username+" From: Me");
-            }
-            
-            /*Add all request to one table */
-            var allRequests = new Array();
-
-            for(var i=0;i<requestsToMe.length;i++){
-                allRequests.push(requestsToMe[i]);
-            }
-
-            for(var i=0;i<requestsFromMe.length;i++){
-                allRequests.push(requestsFromMe[i]);
-            }
-
-            /* Send the array with the requests */
-            response.send(allRequests);
-        })
+        /* Na ftiaxw to from kai to tou */
+        response.send(tempArray);
     })
 })
+
+/* Return the number of pages at friend requests */
+app.post('/getFriendRequestPages',(req,res)=>{
+    
+    var usernameOfMe = req.body.username;
+    var pagesLimit=req.body.pagesLimit;
+    var response=res;
+
+    var text ='SELECT username,F.status from USERS U,friend_requests F WHERE F.friend_id=U.user_id '+
+    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1) and U.user_id in(SELECT friend_id FROM friend_requests F, users U WHERE F.user_id=U.user_id '+
+    'and F.user_id=(SELECT user_id FROM Users U WHERE U.username=$1)) '+
+    'UNION '+
+    'SELECT DISTINCT username,F.status FROM Users U,Friend_requests F WHERE  U.user_id=F.user_id and U.user_id in'+
+    '(SELECT F.user_id FROM friend_requests F, users U WHERE F.friend_id='+
+    'U.user_id and F.friend_id=(SELECT user_id FROM Users U WHERE U.username=$1))'
+    var values=[usernameOfMe];
+
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        
+        console.log("Data: "+res.rows.length+" Limit: "+pagesLimit);
+        var pages={
+            friendRequestPages:Math.ceil(res.rows.length/pagesLimit),
+        }
+        response.send(pages);
+    })
+})
+
 /* Remove request from the database */
 app.post('/removeRequest',(req,res)=>{
     var response=res;
