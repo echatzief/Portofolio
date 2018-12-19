@@ -322,6 +322,31 @@ app.post('/getFriendRequestPages',(req,res)=>{
     })
 })
 
+/* Return the number of pages at friends */
+app.post('/getFriendPages',(req,res)=>{
+
+    var usernameOfMe = req.body.username;
+    var pagesLimit=req.body.pagesLimit;
+    var response=res;
+
+    var text='SELECT username FROM USERS WHERE user_id IN('+
+    'SELECT F.friend_id FROM Friends F WHERE F.user_id IN (SELECT user_id FROM USERS WHERE username=$1)'+ 
+    'UNION'+
+    ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1))'
+    var values=[usernameOfMe];
+
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        
+        console.log("Data: "+res.rows.length+" Limit: "+pagesLimit);
+        var pages={
+            friendPages:Math.ceil(res.rows.length/pagesLimit),
+        }
+        response.send(pages);
+    })
+})
 /* Remove request from the database */
 app.post('/removeRequest',(req,res)=>{
     var response=res;
@@ -466,15 +491,18 @@ app.post('/changeStatus',(req,res)=>{
 app.post('/getFriends',(req,res)=>{
 
     /* Get the parameters */
-    var username=req.body.username;
+    var usernameOfMe = req.body.username;
+    var pagesLimit=req.body.pagesLimit;
+    var requestedPage=req.body.requestedPage;
     var response=res;
 
     /* Get the friends with a query */
     var text ='SELECT username FROM USERS WHERE user_id IN('+
-        'SELECT F.friend_id FROM Friends F WHERE F.user_id IN (SELECT user_id FROM USERS WHERE username=$1)'+ 
-        'UNION'+
-        ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1))'
-    var values=[username];
+    'SELECT F.friend_id FROM Friends F WHERE F.user_id IN (SELECT user_id FROM USERS WHERE username=$1)'+ 
+    'UNION'+
+    ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1)) '+
+    'LIMIT $2 OFFSET $3'
+    var values=[usernameOfMe,pagesLimit,(requestedPage-1)*pagesLimit];
     client.query(text,values,(err,res)=>{
         if(err){
             console.log(err);

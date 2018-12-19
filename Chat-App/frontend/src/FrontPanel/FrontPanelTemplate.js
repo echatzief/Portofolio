@@ -19,7 +19,7 @@ class FrontPanelTemplate extends Component{
         /* Open a socket with the backend */
         this.socket=io();
 
-        this.pageLimit=20;
+        this.pageLimit=1;
     }
 
     componentDidMount(){
@@ -40,8 +40,8 @@ class FrontPanelTemplate extends Component{
         /* Get the pages of friend requests */
         this.getFriendRequestPages();
 
-        /* Get the your friends */
-        this.getTheFriends();
+        /* Get the pages of friends */
+        this.getTheFriendsPages();
 
         /* Refresh friend requests */
         this.socket.on('refreshFriendRequestList',message=>{
@@ -56,7 +56,7 @@ class FrontPanelTemplate extends Component{
         this.socket.on('refreshFriendList',message=>{
             if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
                 console.log('Inside Refresh');
-                this.getTheFriends();
+                this.getTheFriendsPages();
             }
         });
     }
@@ -72,7 +72,7 @@ class FrontPanelTemplate extends Component{
         axios.post('/getFriendRequestPages',{username,pagesLimit})
         .then(res=>{
 
-            console.log("Pages we receive: "+res.data.friendRequestPages);
+            console.log("Friend Requests Pages we receive: "+res.data.friendRequestPages);
 
             /* Set the friend request pages */
             mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",res.data.friendRequestPages));
@@ -112,7 +112,7 @@ class FrontPanelTemplate extends Component{
         axios.post('/getFriendRequest',{username,pagesLimit,requestedPage})
         .then(res=>{
     
-            console.log("We request the page: "+requestedPage);
+            console.log("Friends Requests -- > We request the page: "+requestedPage);
 
             /* Push the old ones */
             var allRequests= new Array();
@@ -140,7 +140,7 @@ class FrontPanelTemplate extends Component{
         var div = $('#messageDiv');
         if (div[0].scrollHeight - div.scrollTop() == div.height())
         {
-            console.log("Reached Bottom");
+            console.log("Friend Requests Reached Bottom");
             console.log("Remaining: "+mainPanelStore.getState().friendRequestsRemainingPages);
 
             if(mainPanelStore.getState().friendRequestsRemainingPages > 0){
@@ -271,18 +271,88 @@ class FrontPanelTemplate extends Component{
 
     /* --------------------------------------- Friends -------------------------------------------*/
 
-    /* Get the friends */
-    getTheFriends = ()=>{
+    getTheFriendsPages = ()=>{
+
         var username=mainPanelStore.getState().currentUser;
-        var requestedPage=mainPanelStore.getState().friendRequestsRemaining;
-        axios.post('/getFriends',{username,requestedPage})
+        var pagesLimit=this.pageLimit;
+
+        axios.post('/getFriendPages',{username,pagesLimit})
         .then(res=>{
-            /* Set the friends */
-            console.log(res.data);
-            mainPanelStore.dispatch(changeField("SET_FRIENDS",res.data));
+
+            console.log("Friend Pages we receive: "+res.data.friendPages);
+
+            /* Set the friend request pages */
+            mainPanelStore.dispatch(changeField("SET_FRIEND_REMAINING_PAGES",res.data.friendPages));
+        
+            /* Get the friend requests */
+            username=mainPanelStore.getState().currentUser;
+            pagesLimit=this.pageLimit;
+            var requestedPage=mainPanelStore.getState().friendRemainingPages;
+
+            /* We request if page is positive */
+            if(res.data.friendPages > 0){
+                console.log("We request the page: "+requestedPage);
+
+                axios.post('/getFriends',{username,pagesLimit,requestedPage})
+                .then(res=>{
+
+                    // Save the friendσ 
+                    mainPanelStore.dispatch(changeField("SET_FRIENDS",res.data));
+                    console.log(res);
+
+                    // Reduce the remaining states 
+                    mainPanelStore.dispatch(changeField("SET_FRIEND_REMAINING_PAGES",mainPanelStore.getState().friendRemainingPages-1));
+                })
+            } 
+            else{
+                mainPanelStore.dispatch(changeField("SET_FRIENDS",[]));
+            }
         })
     }
 
+    scrollandGetFriends = ()=>{
+        var username=mainPanelStore.getState().currentUser;
+        var pagesLimit=this.pageLimit;
+        var requestedPage=mainPanelStore.getState().friendRemainingPages;
+
+        axios.post('/getFriends',{username,pagesLimit,requestedPage})
+        .then(res=>{
+    
+            console.log("Friends --> We request the page: "+requestedPage);
+
+            /* Push the old ones */
+            var allRequests= new Array();
+            for(var i=0;i<mainPanelStore.getState().friends.length;i++){
+                allRequests.push(mainPanelStore.getState().friends[i]);
+            }
+
+            /* Push the new ones */
+            for(i=0;i<res.data.length;i++){
+                allRequests.push(res.data[i]);
+            }
+
+            /* Save the friend requests */
+            mainPanelStore.dispatch(changeField("SET_FRIENDS",allRequests));
+
+            /* Reduce the remaining states */
+            mainPanelStore.dispatch(changeField("SET_FRIEND_REMAINING_PAGES",mainPanelStore.getState().friendRemainingPages-1));
+        })
+    }
+
+    /* Check to fetch friend requests */
+    checkToFetchFriends = (e)=>{
+        e.preventDefault();
+        var div = $('#friendsDiv');
+        if (div[0].scrollHeight - div.scrollTop() == div.height())
+        {
+            console.log("Friends Reached Bottom");
+            console.log("Remaining: "+mainPanelStore.getState().friendRemainingPages);
+
+            if(mainPanelStore.getState().friendRemainingPages > 0){
+                this.scrollandGetFriends();
+            }
+        }
+    }
     /* Add user as a friend */
     addUserAsFriend = (e)=>{
 
@@ -390,6 +460,7 @@ class FrontPanelTemplate extends Component{
                 />
                 <Friends 
                     renderTheFriends={this.renderTheFriends}
+                    checkToFetchFriends={this.checkToFetchFriends}
                 />
             </div>
         )

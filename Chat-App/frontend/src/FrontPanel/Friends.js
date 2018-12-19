@@ -24,7 +24,7 @@ const Friends = (props)=>{
                 </div>
                 {/* Friend Requests Data */}
                 <div id="collapsSec" className="collapse show" aria-labelledby="headerSec" data-parent="#accordionSec">
-                    <div className="card-body">
+                    <div id="friendsDiv" style={{height:'50px',overflowY:'auto'}} onScrollCapture={props.checkToFetchFriends}>
                         <ul>{mainPanelStore.getState().friends.map((item)=>props.renderTheFriends(item))}</ul>
                     </div>
                 </div>

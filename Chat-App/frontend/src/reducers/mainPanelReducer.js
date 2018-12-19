@@ -8,6 +8,7 @@ export default(state,action)=>{
                 friendRequests:state.friendRequests,
                 friends:state.friends,
                 friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:state.friendRemainingPages,
             };
         case "CHANGE_SEARCH_BOX":
             return{
@@ -17,6 +18,7 @@ export default(state,action)=>{
                 friendRequests:state.friendRequests,
                 friends:state.friends,
                 friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:state.friendRemainingPages,
             };
         case "CHANGE_SEARCH_RESULTS":
             return{
@@ -26,6 +28,7 @@ export default(state,action)=>{
                 friendRequests:state.friendRequests,
                 friends:state.friends,
                 friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:state.friendRemainingPages,
             };
         case "GET_FRIEND_REQUESTS":
             return{
@@ -35,6 +38,7 @@ export default(state,action)=>{
                 friendRequests:action.data,
                 friends:state.friends,
                 friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:state.friendRemainingPages,
             }
         case "SET_FRIENDS":
             return{
@@ -44,6 +48,7 @@ export default(state,action)=>{
                 friendRequests:state.friendRequests,
                 friends:action.data,
                 friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:state.friendRemainingPages,
             }
         case "SET_FRIEND_REQUESTS_REMAINING_PAGES":
             return{
@@ -53,6 +58,17 @@ export default(state,action)=>{
                 friendRequests:state.friendRequests,
                 friends:state.friends,
                 friendRequestsRemainingPages:action.data,
+                friendRemainingPages:state.friendRemainingPages,
+            }
+        case "SET_FRIEND_REMAINING_PAGES":
+            return{
+                searchBox:state.searchBox,      
+                searchResults:state.searchResults,
+                currentUser:state.currentUser,
+                friendRequests:state.friendRequests,
+                friends:state.friends,
+                friendRequestsRemainingPages:state.friendRequestsRemainingPages,
+                friendRemainingPages:action.data,
             }
         case "CLEAR_FIELDS":
             return{
@@ -62,6 +78,7 @@ export default(state,action)=>{
                 friendRequests:[], 
                 friends:[],
                 friendRequestsRemainingPages:0,
+                friendRemainingPages:0,
             }
         default: return state;
     }
