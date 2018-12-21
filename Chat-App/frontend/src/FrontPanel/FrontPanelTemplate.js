@@ -11,6 +11,22 @@ import io from 'socket.io-client';
 const  results = {
     marginTop:'4%',
 }
+
+const greenStatus={
+    height: '12px',
+    width: '12px',
+    backgroundColor: '#42b72a',
+    borderRadius: '50%',
+    display: 'inline-block',
+}
+
+const redStatus={
+    height: '12px',
+    width: '12px',
+    backgroundColor: 'red',
+    borderRadius: '50%',
+    display: 'inline-block',
+}
 class FrontPanelTemplate extends Component{
 
     constructor(props){
@@ -37,6 +53,9 @@ class FrontPanelTemplate extends Component{
         /* Set the current user */
         mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
 
+        /* Change my activity status */
+        this.changeActivity("ACTIVE");
+
         /* Get the pages of friend requests */
         this.getFriendRequestPages();
 
@@ -58,6 +77,11 @@ class FrontPanelTemplate extends Component{
                 console.log('Inside Refresh');
                 this.getTheFriendsPages();
             }
+        });
+
+        /* Change friends list after change status */
+        this.socket.on('activityChanged',message=>{
+            this.getTheFriendsPages();
         });
     }
 
@@ -251,21 +275,47 @@ class FrontPanelTemplate extends Component{
         const contStyle={
             marginTop:'2%',
         }
-        return(
-            <div className="container" style={contStyle}>
-                <div className="row">
-                    <div className="col-sm">
-                        {item}
-                    </div>
-                    <div className="col-sm">
-                        <button type="button" id={item} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
-                    </div>
-                    <div className="col-sm">
-                        <button type="button" id={item} className="btn btn-secondary">Chat</button>
+
+        if(item.status ==="ACTIVE"){
+            return(
+                <div className="container" style={contStyle}>
+                    <div className="row">
+                        <div className="col-sm">
+                            <span style={greenStatus}></span>
+                        </div>
+                        <div className="col-sm">
+                            {item.username}
+                        </div>
+                        <div className="col-sm">
+                            <button type="button" id={item.username} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
+                        </div>
+                        <div className="col-sm">
+                            <button type="button" id={item.username} className="btn btn-secondary">Chat</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        }
+        else{
+            return(
+                <div className="container" style={contStyle}>
+                    <div className="row">
+                        <div className="col-sm">
+                            <span style={redStatus}></span>
+                        </div>
+                        <div className="col-sm">
+                            {item.username}
+                        </div>
+                        <div className="col-sm">
+                            <button type="button" id={item.username} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
+                        </div>
+                        <div className="col-sm">
+                            <button type="button" id={item.username} className="btn btn-secondary">Chat</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
     }
     /* --------------------------------------- Render Items --------------------------------------*/
 
@@ -427,11 +477,15 @@ class FrontPanelTemplate extends Component{
     }
     /* --------------------------------------- Search  -------------------------------------------*/
 
-    
-    getTheActiveOnes = ()=>{
-
+    /* Change my activity status */
+    changeActivity = (status)=>{
+        var username = mainPanelStore.getState().currentUser;
+        axios.post('/changeActivity',{username,status})
+        .then(res=>{
+            console.log(res);
+            console.log('Activity status changed.');
+        })
     }
-    
     /* Clear the search box */
     clearSearchInput(){
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",''));
@@ -441,8 +495,6 @@ class FrontPanelTemplate extends Component{
     changeSearchInput=(e)=>{
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",e.target.value));
     }
-
-    
 
     render(){
         return(

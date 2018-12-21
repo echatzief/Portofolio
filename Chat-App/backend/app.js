@@ -497,7 +497,7 @@ app.post('/getFriends',(req,res)=>{
     var response=res;
 
     /* Get the friends with a query */
-    var text ='SELECT username FROM USERS WHERE user_id IN('+
+    var text ='SELECT username,status FROM USERS WHERE user_id IN('+
     'SELECT F.friend_id FROM Friends F WHERE F.user_id IN (SELECT user_id FROM USERS WHERE username=$1)'+ 
     'UNION'+
     ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1)) '+
@@ -510,12 +510,35 @@ app.post('/getFriends',(req,res)=>{
 
         var friendArray = new Array();
         for(var i=0;i<res.rows.length;i++){
-            friendArray.push(res.rows[i].username.trim());
+            var item = {
+                username:res.rows[i].username.trim(),
+                status:res.rows[i].status.trim(),
+            }
+            friendArray.push(item);
         }
         response.send(friendArray);
     })
 })
 
+/* Change my activity status */
+app.post('/changeActivity',(req,res)=>{
+    var username = req.body.username;
+    var status = req.body.status;
+    var response=res;
+
+    console.log("Wanna add to "+status+": "+username);
+
+    var text ='UPDATE USERS SET status=$1 WHERE username=$2'
+    var values=[status,username];
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        /* Refresh friends */
+        io.emit('activityChanged',username);
+        response.sendStatus(200);
+    })
+})
 /*--------------------------------------------- SOCKETS -----------------------------------------------*/
 
 
