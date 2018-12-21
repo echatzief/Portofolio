@@ -56,12 +56,23 @@ class FrontPanelTemplate extends Component{
         /* Change my activity status */
         this.changeActivity("ACTIVE");
 
+        /* Change to NO ACTIVE when close */
+        window.onbeforeunload = function() {
+            var username = mainPanelStore.getState().currentUser;
+            var status="NO ACTIVE"
+            axios.post('/changeActivity',{username,status})
+            .then(res=>{
+                console.log(res);
+                console.log('Activity status changed.');
+            })
+            return;
+         };
+
         /* Get the pages of friend requests */
         this.getFriendRequestPages();
 
         /* Get the pages of friends */
         this.getTheFriendsPages();
-
         /* Refresh friend requests */
         this.socket.on('refreshFriendRequestList',message=>{
             console.log(message);
@@ -84,7 +95,6 @@ class FrontPanelTemplate extends Component{
             this.getTheFriendsPages();
         });
     }
-
     /* ---------------------------------------- Friend Requests ----------------------------------*/
 
     /* Get the request pages */

@@ -541,7 +541,6 @@ app.post('/changeActivity',(req,res)=>{
 })
 /*--------------------------------------------- SOCKETS -----------------------------------------------*/
 
-
 /* Run the app */
 http.listen(PORT,()=>{
     console.log("Start app at port: "+PORT);
