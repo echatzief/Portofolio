@@ -43,15 +43,15 @@ class FrontPanelTemplate extends Component{
         /* Clear all the fields */
         mainPanelStore.dispatch(changeField("CLEAR_FIELDS",''));
 
-        /* Get the full URL */
-        var fullURL=window.location.href;
-    
-        /* Get the username  from url*/
-        var fullURLSplit=fullURL.split("/");
-        var uname=fullURLSplit[4].trim();
-
-        /* Set the current user */
-        mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
+        var uname=localStorage.getItem('username');
+        if(uname==null){
+            this.props.history.push('/');
+        }
+        else{
+            console.log("USERNAME: "+uname);
+            /* Set the current user */
+            mainPanelStore.dispatch(changeField("CHANGE_CURRECT_USER",uname));
+        }
 
         /* Change my activity status */
         this.changeActivity("ACTIVE");
@@ -115,6 +115,7 @@ class FrontPanelTemplate extends Component{
             username=mainPanelStore.getState().currentUser;
             pagesLimit=this.pageLimit;
             var requestedPage=mainPanelStore.getState().friendRequestsRemainingPages;
+            var wannaNow=mainPanelStore.getState().friendRequestPagesAsked;
 
             /* We request if page is positive */
             if(res.data.friendRequestPages > 0){

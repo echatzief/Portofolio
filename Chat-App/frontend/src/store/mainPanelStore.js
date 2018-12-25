@@ -8,6 +8,8 @@ const initialState={
     friendRequests:[],   /* Friend Requests */
     friends:[],         /* Friends we have */
     friendRequestsRemainingPages:0, /* Pages of friend requests */
+    friendRequestPagesAsked:0,
+    friendPagesAsked:0,
     friendRemainingPages:0          /* Pages of friends */
 }
 

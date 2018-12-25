@@ -477,6 +477,7 @@ app.post('/changeStatus',(req,res)=>{
                         to:usernameWhoReceive,
                     }
                     io.emit('refreshFriendRequestList',where);
+                    io.emit('refreshFriendList',where);
                 })
             }
             else{
