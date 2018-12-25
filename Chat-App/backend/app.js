@@ -257,9 +257,10 @@ app.post('/getFriendRequest',(req,res)=>{
     var usernameOfMe = req.body.username;
     var pagesLimit=req.body.pagesLimit;
     var requestedPage=req.body.requestedPage;
+    var wannaNow=req.body.wannaNow;
     var response=res;
 
-    console.log("Username: "+usernameOfMe+" Pages: "+pagesLimit+" Requested: "+requestedPage);
+    console.log("Username: "+usernameOfMe+" Pages: "+pagesLimit+" Requested: "+requestedPage+ " wannaNow: "+wannaNow);
 
 
     var text='SELECT fromUser.username as fromUser ,toUser.username as toUser, F.status FROM USERS fromUser,USERS toUser,Friend_requests F WHERE '+
@@ -271,7 +272,7 @@ app.post('/getFriendRequest',(req,res)=>{
     'toUser.user_id IN(SELECT user_id FROM Users U WHERE U.username=$1) and fromUser.user_id=F.user_id  and fromUser.user_id in (SELECT F.user_id FROM friend_requests F, users U WHERE F.friend_id= '+
     'U.user_id and F.friend_id IN (SELECT user_id FROM Users U WHERE U.username=$1)) '+
     'LIMIT $2 OFFSET $3';
-    var values=[usernameOfMe,pagesLimit,(requestedPage-1)*pagesLimit];
+    var values=[usernameOfMe,pagesLimit,wannaNow*pagesLimit];
     
     /* Get the friend request per page */
     client.query(text,values,(err,res)=>{
@@ -495,6 +496,7 @@ app.post('/getFriends',(req,res)=>{
     var usernameOfMe = req.body.username;
     var pagesLimit=req.body.pagesLimit;
     var requestedPage=req.body.requestedPage;
+    var wannaNow=req.body.wannaNow;
     var response=res;
 
     /* Get the friends with a query */
@@ -503,7 +505,7 @@ app.post('/getFriends',(req,res)=>{
     'UNION'+
     ' SELECT F.user_id FROM Friends F WHERE F.friend_id IN(SELECT user_id FROM USERS WHERE username=$1)) '+
     'LIMIT $2 OFFSET $3'
-    var values=[usernameOfMe,pagesLimit,(requestedPage-1)*pagesLimit];
+    var values=[usernameOfMe,pagesLimit,wannaNow*pagesLimit];
     client.query(text,values,(err,res)=>{
         if(err){
             console.log(err);

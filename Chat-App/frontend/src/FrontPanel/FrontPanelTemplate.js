@@ -35,7 +35,7 @@ class FrontPanelTemplate extends Component{
         /* Open a socket with the backend */
         this.socket=io();
 
-        this.pageLimit=1;
+        this.pageLimit=3;
     }
 
     componentDidMount(){
@@ -78,6 +78,7 @@ class FrontPanelTemplate extends Component{
             console.log(message);
             if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
                 console.log("INside");
+                mainPanelStore.dispatch(changeField("SET_FRIENDS_REQUESTS_ASKED",0));
                 this.getFriendRequestPages();
             }
         });
@@ -86,13 +87,17 @@ class FrontPanelTemplate extends Component{
         this.socket.on('refreshFriendList',message=>{
             if(message.from.trim()===mainPanelStore.getState().currentUser || message.to.trim()===mainPanelStore.getState().currentUser){
                 console.log('Inside Refresh');
+                mainPanelStore.dispatch(changeField("SET_FRIENDS_ASKED",0));
                 this.getTheFriendsPages();
             }
         });
 
         /* Change friends list after change status */
         this.socket.on('activityChanged',message=>{
-            this.getTheFriendsPages();
+            if(message.trim()!=uname){
+                mainPanelStore.dispatch(changeField("SET_FRIENDS_ASKED",0));
+                this.getTheFriendsPages();
+            }
         });
     }
     /* ---------------------------------------- Friend Requests ----------------------------------*/
@@ -118,17 +123,18 @@ class FrontPanelTemplate extends Component{
             var wannaNow=mainPanelStore.getState().friendRequestPagesAsked;
 
             /* We request if page is positive */
-            if(res.data.friendRequestPages > 0){
+            if(res.data.friendRequestPages > wannaNow){
                 console.log("We request the page: "+requestedPage);
 
-                axios.post('/getFriendRequest',{username,pagesLimit,requestedPage})
+                axios.post('/getFriendRequest',{username,pagesLimit,requestedPage,wannaNow})
                 .then(res=>{
 
                     /* Save the friend requests */
+                    console.log(res.data);
                     mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",res.data));
 
                     /* Reduce the remaining states */
-                    mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",mainPanelStore.getState().friendRequestsRemainingPages-1));
+                    mainPanelStore.dispatch(changeField("SET_FRIENDS_REQUESTS_ASKED",mainPanelStore.getState().friendRequestPagesAsked+1));
                 })
             } 
             else{
@@ -143,11 +149,13 @@ class FrontPanelTemplate extends Component{
         var username=mainPanelStore.getState().currentUser;
         var pagesLimit=this.pageLimit;
         var requestedPage=mainPanelStore.getState().friendRequestsRemainingPages;
+        var wannaNow=mainPanelStore.getState().friendRequestPagesAsked;
 
-        axios.post('/getFriendRequest',{username,pagesLimit,requestedPage})
+        axios.post('/getFriendRequest',{username,pagesLimit,requestedPage,wannaNow})
         .then(res=>{
-    
+            
             console.log("Friends Requests -- > We request the page: "+requestedPage);
+            console.log(res.data);
 
             /* Push the old ones */
             var allRequests= new Array();
@@ -165,7 +173,7 @@ class FrontPanelTemplate extends Component{
             mainPanelStore.dispatch(changeField("GET_FRIEND_REQUESTS",allRequests));
 
             /* Reduce the remaining states */
-            mainPanelStore.dispatch(changeField("SET_FRIEND_REQUESTS_REMAINING_PAGES",mainPanelStore.getState().friendRequestsRemainingPages-1));
+            mainPanelStore.dispatch(changeField("SET_FRIENDS_REQUESTS_ASKED",mainPanelStore.getState().friendRequestPagesAsked+1));
         })
     }
 
@@ -177,8 +185,9 @@ class FrontPanelTemplate extends Component{
         {
             console.log("Friend Requests Reached Bottom");
             console.log("Remaining: "+mainPanelStore.getState().friendRequestsRemainingPages);
+            console.log("Friend Requests asked: "+mainPanelStore.getState().friendRequestPagesAsked);
 
-            if(mainPanelStore.getState().friendRequestsRemainingPages > 0){
+            if(mainPanelStore.getState().friendRequestPagesAsked < mainPanelStore.getState().friendRequestsRemainingPages ){
                 this.scrollandGetFriendRequest();
             }
         }
@@ -349,12 +358,14 @@ class FrontPanelTemplate extends Component{
             username=mainPanelStore.getState().currentUser;
             pagesLimit=this.pageLimit;
             var requestedPage=mainPanelStore.getState().friendRemainingPages;
+            var wannaNow=mainPanelStore.getState().friendPagesAsked;
 
             /* We request if page is positive */
-            if(res.data.friendPages > 0){
+            if(res.data.friendPages > wannaNow){
                 console.log("We request the page: "+requestedPage);
+                console.log("Counter: "+wannaNow);
 
-                axios.post('/getFriends',{username,pagesLimit,requestedPage})
+                axios.post('/getFriends',{username,pagesLimit,requestedPage,wannaNow})
                 .then(res=>{
 
                     // Save the friendσ 
@@ -362,7 +373,7 @@ class FrontPanelTemplate extends Component{
                     console.log(res);
 
                     // Reduce the remaining states 
-                    mainPanelStore.dispatch(changeField("SET_FRIEND_REMAINING_PAGES",mainPanelStore.getState().friendRemainingPages-1));
+                    mainPanelStore.dispatch(changeField("SET_FRIENDS_ASKED",mainPanelStore.getState().friendPagesAsked+1));
                 })
             } 
             else{
@@ -375,8 +386,10 @@ class FrontPanelTemplate extends Component{
         var username=mainPanelStore.getState().currentUser;
         var pagesLimit=this.pageLimit;
         var requestedPage=mainPanelStore.getState().friendRemainingPages;
+        var wannaNow=mainPanelStore.getState().friendPagesAsked;
 
-        axios.post('/getFriends',{username,pagesLimit,requestedPage})
+        console.log("Counter: "+wannaNow);
+        axios.post('/getFriends',{username,pagesLimit,requestedPage,wannaNow})
         .then(res=>{
     
             console.log("Friends --> We request the page: "+requestedPage);
@@ -396,7 +409,7 @@ class FrontPanelTemplate extends Component{
             mainPanelStore.dispatch(changeField("SET_FRIENDS",allRequests));
 
             /* Reduce the remaining states */
-            mainPanelStore.dispatch(changeField("SET_FRIEND_REMAINING_PAGES",mainPanelStore.getState().friendRemainingPages-1));
+            mainPanelStore.dispatch(changeField("SET_FRIENDS_ASKED",mainPanelStore.getState().friendPagesAsked+1));
         })
     }
 
@@ -408,8 +421,9 @@ class FrontPanelTemplate extends Component{
         {
             console.log("Friends Reached Bottom");
             console.log("Remaining: "+mainPanelStore.getState().friendRemainingPages);
+            console.log("Friend asked: "+mainPanelStore.getState().friendPagesAsked);
 
-            if(mainPanelStore.getState().friendRemainingPages > 0){
+            if(mainPanelStore.getState().friendPagesAsked < mainPanelStore.getState().friendRemainingPages ){
                 this.scrollandGetFriends();
             }
         }
