@@ -93,7 +93,7 @@ class LoginTemplate extends Component{
             else{
                 /* Pass the username to the next store*/
                 localStorage.setItem('username',res.data);
-                this.props.history.push('/frontPanel/');
+                this.props.history.push('/frontPanel');
             }
         })
 

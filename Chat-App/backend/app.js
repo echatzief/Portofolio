@@ -43,7 +43,7 @@ app.get('/signUp',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 
-app.get('/frontPanel/*',(req,res)=>{
+app.get('/frontPanel',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
 app.get('/chat',(req,res)=>{
