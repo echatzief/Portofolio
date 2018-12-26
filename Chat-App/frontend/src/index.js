@@ -6,7 +6,8 @@ import FrontPanel from './FrontPanel/FrontPanelTemplate';
 import {BrowserRouter as Router,Route,} from 'react-router-dom';
 import { store } from './store/store';
 import {mainPanelStore} from './store/mainPanelStore';
-
+import {ChatStore} from './store/ChatStore';
+import Chat from './ChatInterface/Chat';
 
 const render = function(){
     ReactDOM.render(
@@ -15,6 +16,7 @@ const render = function(){
                 <Route exact path="/" component={Login}/>
                 <Route path="/signUp" component={SignUp}/>
                 <Route path="/frontPanel" component={FrontPanel}/>
+                <Route path="/chat" component={Chat}/>
             </div>
         </Router>
       
@@ -24,4 +26,5 @@ const render = function(){
 
 store.subscribe(render);
 mainPanelStore.subscribe(render);
+ChatStore.subscribe(render);
 render();

@@ -310,7 +310,7 @@ class FrontPanelTemplate extends Component{
                             <button type="button" id={item.username} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
                         </div>
                         <div className="col-sm">
-                            <button type="button" id={item.username} className="btn btn-secondary">Chat</button>
+                            <button type="button" id={item.username} onClick={this.goToChat} className="btn btn-secondary">Chat</button>
                         </div>
                     </div>
                 </div>
@@ -330,7 +330,7 @@ class FrontPanelTemplate extends Component{
                             <button type="button" id={item.username} className="btn btn-danger" onClick={this.removeFriendFromList}>Remove</button>
                         </div>
                         <div className="col-sm">
-                            <button type="button" id={item.username} className="btn btn-secondary">Chat</button>
+                            <button type="button" id={item.username} onClick={this.goToChat} className="btn btn-secondary">Chat</button>
                         </div>
                     </div>
                 </div>
@@ -443,7 +443,16 @@ class FrontPanelTemplate extends Component{
 
     /* Remove friends from the list */
     removeFriendFromList = (e)=>{
+        var myUsername=mainPanelStore.getState().currentUser.trim();
+        var friendUsername=e.target.id.trim();
 
+        console.log("Friend: "+friendUsername);
+
+        console.log("Wanna Remove : "+friendUsername);
+        axios.post('/removeFriend',{myUsername,friendUsername})
+        .then(res=>{
+            console.log(res);
+        })
     }
 
     /* --------------------------------------- Friends -------------------------------------------*/
@@ -519,6 +528,13 @@ class FrontPanelTemplate extends Component{
     /* Change the input */
     changeSearchInput=(e)=>{
         mainPanelStore.dispatch(changeField("CHANGE_SEARCH_BOX",e.target.value));
+    }
+
+    /* Go to chat */
+    goToChat = (e)=>{
+        //Save the friend to storage
+        localStorage.setItem('friend',e.target.id.trim());
+        this.props.history.push('/chat');
     }
 
     render(){

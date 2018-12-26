@@ -46,6 +46,10 @@ app.get('/signUp',(req,res)=>{
 app.get('/frontPanel/*',(req,res)=>{
     res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
 })
+app.get('/chat',(req,res)=>{
+    res.sendFile( path.join( __dirname, '/../frontend/build', 'index.html' ));
+})
+
 
 //Under everything
 app.use(express.static(path.join(__dirname, '/../frontend/build')));
@@ -542,6 +546,29 @@ app.post('/changeActivity',(req,res)=>{
         response.sendStatus(200);
     })
 })
+app.post('/removeFriend',(req,res)=>{
+    var myUsername=req.body.myUsername;
+    var friendUsername=req.body.friendUsername;
+    var response=res;
+
+    console.log("Remove : "+myUsername+" "+friendUsername);
+    var text ='DELETE FROM FRIENDS WHERE count=(SELECT count FROM FRIENDS WHERE('+
+    'user_id=(SELECT user_id FROM users WHERE username=$1) and friend_id=(SELECT user_id FROM users WHERE username=$2)'+
+    ') OR (user_id=(SELECT user_id FROM users WHERE username=$2) and friend_id=(SELECT user_id FROM users WHERE username=$1)))'
+    var values=[myUsername,friendUsername];
+    client.query(text,values,(err,res)=>{
+        if(err){
+            console.log(err);
+        }
+        /* Refresh friends */
+        var where={
+            from:myUsername,
+            to:friendUsername,
+        }
+        io.emit('refreshFriendList',where);
+        response.sendStatus(200);
+    })
+});
 /*--------------------------------------------- SOCKETS -----------------------------------------------*/
 
 /* Run the app */
